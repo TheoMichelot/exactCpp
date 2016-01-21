@@ -75,7 +75,7 @@ for (iii in 1:nbIter)
                 subData[t,colHabitat] <- findRegion(subData[t,colX],subData[t,colY],map)
                 
                 # Prob of actual switch depends on rates and on region
-                probs <- switchRate(subData[t-1,colState],subData[t,colHabitat],subData[t,colTime],lambdapar)/kappa
+                probs <- switchRate(subData[t-1,colState],subData[t,colHabitat],lambdapar)/kappa
                 
                 jumpNow <- runif(1)<sum(probs) # is there a jump?
                 
@@ -325,22 +325,19 @@ for (iii in 1:nbIter)
         oldLL <- oldLogLX1+oldLogLY1+oldLogLX2+oldLogLY2  
         
         # Propose new location
-        
         Xnew <- rnorm(1,mean=X1,sd=SDP)
         Ynew <- rnorm(1,mean=Y1,sd=SDP)
         Tnew <- runif(1,min=T2,max=Tj)
         Hnew <- findRegion(Xnew,Ynew,map)
         
         # Effect of habitat
-        
-        rate1 <- switchRate(S2,H1,T1,lambdapar)
+        rate1 <- switchRate(S2,H1,lambdapar)
         rate1[S2] <- kappa-sum(rate1)
-        rate.new <- switchRate(S2,Hnew,Tnew,lambdapar)
-        rate.new[S2] <- kappa-sum(rate.new)
-        newHfactor <- rate.new[S1]/rate1[S1]
+        rateNew <- switchRate(S2,Hnew,lambdapar)
+        rateNew[S2] <- kappa-sum(rateNew)
+        newHfactor <- rateNew[S1]/rate1[S1]
         
         # New log-likelihood
-        
         newMove2 <- rawMove(mpar,bpar,vpar,state=S2,deltaT=Tnew-T2,xx=X2,yy=Y2)
         
         newLogLX2 <- dnorm(Xnew,mean=X2+newMove2$emx,sd=newMove2$sdx,log=TRUE)
