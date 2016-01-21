@@ -74,10 +74,10 @@ SDP <- 0.15 # for "local update"
 
 # Other model-specific functions
 source("adaptive.r") # to create struct.fn
-source("setup.lambda.adaptive.r") 
-source("update.moveFisher.r")
-source("update.rateFisher.r")
-source("mv.fnOUcommon.r")
+source("switchRate.R") 
+source("updateMove_fisher.R")
+source("updateRate_fisher.R")
+source("rawMove.R")
 
 #' Truncated beta
 #' 
