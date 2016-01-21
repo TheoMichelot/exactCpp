@@ -235,41 +235,41 @@ for (iii in 1:nbIter)
         # Pick out points that are informative about movement,
         # their predecessors, and the states during movement
         
-        whichInf <- which(allData[,colTime]>min(obs[,colTime]))
-        states <- allData[whichInf-1,colState]
+        whichInfo <- which(allData[,colTime]>min(obs[,colTime]))
+        states <- allData[whichInfo-1,colState]
         
         # Calculate changes in position and time
         
-        preX <- allData[whichInf-1,colX]
-        dX <- allData[whichInf,colX]-preX
-        preY <- allData[whichInf-1,colY]
-        dY <- allData[whichInf,colY]-preY
-        deltaT <-  allData[whichInf,colTime]-allData[whichInf-1,colTime]
+        preX <- allData[whichInfo-1,colX]
+        dX <- allData[whichInfo,colX]-preX
+        preY <- allData[whichInfo-1,colY]
+        dY <- allData[whichInfo,colY]-preY
+        deltaT <-  allData[whichInfo,colTime]-allData[whichInfo-1,colTime]
         
-        move.step <- updateMove(bpar, vpar, homog.b, b.proposal.sd, nstate, homog.v, v.proposal.sd, 
+        moveStep <- updateMove(bpar, vpar, homog.b, b.proposal.sd, nstate, homog.v, v.proposal.sd, 
                                 mpar, m.proposal.sd, m.prior.mean, m.prior.sd, b.prior.mean, b.prior.sd, 
                                 v.prior.mean, v.prior.sd)
         
         # Old & new likelihoods
         
-        old.move <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,xx=preX,yy=preY)
-        new.move <- rawMove(move.step$m.prime,move.step$b.prime,move.step$v.prime,state=states,
+        oldMove <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,xx=preX,yy=preY)
+        newMove <- rawMove(moveStep$m.prime,moveStep$b.prime,moveStep$v.prime,state=states,
                             deltaT=deltaT,xx=preX,yy=preY)
         
-        oldLogLX <- sum(dnorm(dX,mean=old.move$emx,sd=old.move$sdx,log=TRUE))
-        oldLogLY <- sum(dnorm(dY,mean=old.move$emy,sd=old.move$sdy,log=TRUE))
+        oldLogLX <- sum(dnorm(dX,mean=oldMove$emx,sd=oldMove$sdx,log=TRUE))
+        oldLogLY <- sum(dnorm(dY,mean=oldMove$emy,sd=oldMove$sdy,log=TRUE))
         
-        newLogLX <- sum(dnorm(dX,mean=new.move$emx,sd=new.move$sdx,log=TRUE))
-        newLogLY <- sum(dnorm(dY,mean=new.move$emy,sd=new.move$sdy,log=TRUE))
+        newLogLX <- sum(dnorm(dX,mean=newMove$emx,sd=newMove$sdx,log=TRUE))
+        newLogLY <- sum(dnorm(dY,mean=newMove$emy,sd=newMove$sdy,log=TRUE))
         
-        logHR <- move.step$new.logprior-move.step$old.logprior+newLogLX+newLogLY-oldLogLX-oldLogLY
+        logHR <- moveStep$new.logprior-moveStep$old.logprior+newLogLX+newLogLY-oldLogLX-oldLogLY
         
         if(runif(1)<exp(logHR)) {
             # Accept movement parameters
             accmove <- accmove+1
-            mpar <- move.step$m.prime
-            bpar <- move.step$b.prime
-            vpar <- move.step$v.prime
+            mpar <- moveStep$m.prime
+            bpar <- moveStep$b.prime
+            vpar <- moveStep$v.prime
         }
     } # end of "if" on updating movement
     
