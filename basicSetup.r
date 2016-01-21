@@ -15,8 +15,8 @@ colBehav <- 7 # "Behav"
 
 # Read map of habitat
 map <- as.matrix(read.table("habitat.csv",sep=",",header=FALSE,skip=3))
-nhabitat <- 3
-nstate <- nhabitat
+nbHabitat <- 3
+nbState <- nbHabitat
 
 #' Find region
 #' 
@@ -53,22 +53,22 @@ m <- c(9,3.5) # center of attraction
 b <- 1.0 # factor for matrix B
 v <- 10 # factor for matrix Lambda
 mpar <- m
-bpar <- rep(b,nstate) # all same to be uninformative AND for correct results with simpler models
-vpar <- rep(v,nstate) #  " 
+bpar <- rep(b,nbState) # all same to be uninformative AND for correct results with simpler models
+vpar <- rep(v,nbState) #  " 
 
 # Priors (on log scale for b, v)
-m.prior.mean <- mpar
-b.prior.mean <- log(bpar)
-v.prior.mean <- log(vpar)
+mPriorMean <- mpar
+bPriorMean <- log(bpar)
+vPriorMean <- log(vpar)
 
-m.prior.sd <- rep(0.7,2)
-b.prior.sd <- rep(2.0,nstate)
-v.prior.sd <- rep(2.0,nstate)
+mPriorSD <- rep(0.7,2)
+bPriorSD <- rep(2.0,nbState)
+vPriorSD <- rep(2.0,nbState)
 
 # MH proposals (on log scale for b, v)
-m.proposal.sd <- rep(0.01,2)
-b.proposal.sd <- rep(0.2,nstate)
-v.proposal.sd <- rep(0.1,nstate)
+mProposalSD <- rep(0.01,2)
+bProposalSD <- rep(0.2,nbState)
+vProposalSD <- rep(0.1,nbState)
 
 SDP <- 0.15 # for "local update"
 
@@ -122,8 +122,8 @@ cat(file=filekappa, "L12","L13","L21","L23","L31","L32", "\n")
 cat(file=filekappa, lambdapar, "\n", append = TRUE)
 
 # Homogeneity between states - for model variation inc DIC calculation
-homogb <- FALSE
-homogv <- FALSE
+bHomog <- FALSE
+vHomog <- FALSE
 
 prUpdateMove <- 1
 

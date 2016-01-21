@@ -24,16 +24,16 @@ for (iii in 1:nbIter)
     ## Simulate potential switches ##
     #################################
     # number of potential switches
-    nswitch <- rpois(1,(Tend-Tbeg)*kappa)
+    nbSwitch <- rpois(1,(Tend-Tbeg)*kappa)
     
     # initialize simulated switches
-    switches <- cbind(X=rep(NA,nswitch),
-                      Y=rep(NA,nswitch),
-                      Time=sort(runif(nswitch,Tbeg,Tend)), # Poisson process -> uniformly distributed
-                      State=rep(NA,nswitch),
-                      Habitat=rep(NA,nswitch),
-                      Jump=rep(NA,nswitch),
-                      Behav=rep(0,nswitch))
+    switches <- cbind(X=rep(NA,nbSwitch),
+                      Y=rep(NA,nbSwitch),
+                      Time=sort(runif(nbSwitch,Tbeg,Tend)), # Poisson process -> uniformly distributed
+                      State=rep(NA,nbSwitch),
+                      Habitat=rep(NA,nbSwitch),
+                      Jump=rep(NA,nbSwitch),
+                      Behav=rep(0,nbSwitch))
     
     # all simulated switches are in the first part, data are in second part
     subData <- rbind(switches,subObs)
@@ -41,9 +41,9 @@ for (iii in 1:nbIter)
     # ranks of data by time
     ranks <- rank(subData[,colTime])
     # indices of potential switches among observations
-    indSwitch <- ranks[1:nswitch]
+    indSwitch <- ranks[1:nbSwitch]
     # indices of observations among potential switches
-    indObs <- ranks[(nswitch+1):nrow(subData)]
+    indObs <- ranks[(nbSwitch+1):nrow(subData)]
     
     # order data in time
     ord <- order(subData[,colTime])
@@ -246,14 +246,14 @@ for (iii in 1:nbIter)
         dY <- allData[whichInfo,colY]-preY
         deltaT <-  allData[whichInfo,colTime]-allData[whichInfo-1,colTime]
         
-        moveStep <- updateMove(bpar, vpar, homog.b, b.proposal.sd, nstate, homog.v, v.proposal.sd, 
-                                mpar, m.proposal.sd, m.prior.mean, m.prior.sd, b.prior.mean, b.prior.sd, 
-                                v.prior.mean, v.prior.sd)
+        moveStep <- updateMove(bpar, vpar, bHomog, bProposalSD, nbState, vHomog, vProposalSD, 
+                                mpar, mProposalSD, mPriorMean, mPriorSD, bPriorMean, bPriorSD, 
+                                vPriorMean, vPriorSD)
         
         # Old & new likelihoods
         
         oldMove <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,xx=preX,yy=preY)
-        newMove <- rawMove(moveStep$m.prime,moveStep$b.prime,moveStep$v.prime,state=states,
+        newMove <- rawMove(moveStep$mprime,moveStep$bprime,moveStep$vprime,state=states,
                             deltaT=deltaT,xx=preX,yy=preY)
         
         oldLogLX <- sum(dnorm(dX,mean=oldMove$emx,sd=oldMove$sdx,log=TRUE))
@@ -262,14 +262,14 @@ for (iii in 1:nbIter)
         newLogLX <- sum(dnorm(dX,mean=newMove$emx,sd=newMove$sdx,log=TRUE))
         newLogLY <- sum(dnorm(dY,mean=newMove$emy,sd=newMove$sdy,log=TRUE))
         
-        logHR <- moveStep$new.logprior-moveStep$old.logprior+newLogLX+newLogLY-oldLogLX-oldLogLY
+        logHR <- moveStep$newLogPrior-moveStep$oldLogPrior+newLogLX+newLogLY-oldLogLX-oldLogLY
         
         if(runif(1)<exp(logHR)) {
             # Accept movement parameters
             accmove <- accmove+1
-            mpar <- moveStep$m.prime
-            bpar <- moveStep$b.prime
-            vpar <- moveStep$v.prime
+            mpar <- moveStep$mprime
+            bpar <- moveStep$bprime
+            vpar <- moveStep$vprime
         }
     } # end of "if" on updating movement
     

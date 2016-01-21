@@ -1,43 +1,43 @@
 
 #' Update movement
-updateMove <- function(b.paras, v.paras, homog.b, b.proposal.sd, nstate, homog.v, v.proposal.sd, m.paras,
-                       m.proposal.sd, m.prior.mean, m.prior.sd, b.prior.mean, b.prior.sd, v.prior.mean,
-                       v.prior.sd)
+updateMove <- function(bpar, vpar, bHomog, bProposalSD, nbState, vHomog, vProposalSD, 
+                       mpar, mProposalSD, mPriorMean, mPriorSD, bPriorMean, bPriorSD, 
+                       vPriorMean, vPriorSD)
 {
-    b.real <- log(b.paras)
-    v.real <- log(v.paras)
+    breal <- log(bpar)
+    vreal <- log(vpar)
     
-    if(homogb) {
-        b.prime <- b.real+rnorm(1,0,b.proposal.sd)
-        b1 <- b.real[1]
-        b2 <- b.prime[1]
+    if(bHomog) {
+        bprime <- breal+rnorm(1,0,bProposalSD)
+        b1 <- breal[1]
+        b2 <- bprime[1]
     } else {
-        b.prime <- b.real+rnorm(nstate,0,b.proposal.sd)
-        b1 <- b.real
-        b2 <- b.prime
+        bprime <- breal+rnorm(nbState,0,bProposalSD)
+        b1 <- breal
+        b2 <- bprime
     }
     
-    if(homogv) {
-        v.prime <- v.real+rnorm(1,0,v.proposal.sd) 
-        v1 <- v.real[1]
-        v2 <- v.prime[1]
+    if(vHomog) {
+        vprime <- vreal+rnorm(1,0,vProposalSD) 
+        v1 <- vreal[1]
+        v2 <- vprime[1]
     } else {
-        v.prime <- rnorm(nstate,v.real,v.proposal.sd)
-        v1 <- v.real
-        v2 <- v.prime
+        vprime <- rnorm(nbState,vreal,vProposalSD)
+        v1 <- vreal
+        v2 <- vprime
     } 
     
-    m.prime <- rnorm(2,m.paras,m.proposal.sd)
+    mprime <- rnorm(2,mpar,mProposalSD)
     
     # Old log prior
-    OLP <- sum(dnorm(m.paras,m.prior.mean,m.prior.sd,log=TRUE))+
-        sum(dnorm(b1,b.prior.mean,b.prior.sd,log=TRUE))+
-        sum(dnorm(v1,v.prior.mean,v.prior.sd,log=TRUE))
+    OLP <- sum(dnorm(mpar,mPriorMean,mPriorSD,log=TRUE))+
+        sum(dnorm(b1,bPriorMean,bPriorSD,log=TRUE))+
+        sum(dnorm(v1,vPriorMean,vPriorSD,log=TRUE))
     
     # New log prior
-    NLP=sum(dnorm(m.prime,m.prior.mean,m.prior.sd,log=TRUE))+
-        sum(dnorm(b2,b.prior.mean,b.prior.sd,log=TRUE))+
-        sum(dnorm(v2,v.prior.mean,v.prior.sd,log=TRUE))
+    NLP=sum(dnorm(mprime,mPriorMean,mPriorSD,log=TRUE))+
+        sum(dnorm(b2,bPriorMean,bPriorSD,log=TRUE))+
+        sum(dnorm(v2,vPriorMean,vPriorSD,log=TRUE))
     
-    return(list(m.prime=m.prime,b.prime=exp(b.prime),v.prime=exp(v.prime),old.logprior=OLP,new.logprior=NLP))  
+    return(list(mprime=mprime,bprime=exp(bprime),vprime=exp(vprime),oldLogPrior=OLP,newLogPrior=NLP))  
 }

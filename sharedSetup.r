@@ -35,7 +35,7 @@ aSwitches <- cbind(X=AXswitch,
 # Define functions
 
 successor <- function(jumpLambda)
-    sample(1:nstate,size=1,prob=jumpLambda)
+    sample(1:nbState,size=1,prob=jumpLambda)
 
 source("minitabGeneric.r") 
 
