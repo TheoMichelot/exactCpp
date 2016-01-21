@@ -33,15 +33,12 @@ aSwitches <- cbind(X=AXswitch,
                    Behav=Abehav)
 
 # Define functions
-
 successor <- function(jumpLambda)
     sample(1:nbState,size=1,prob=jumpLambda)
 
-source("minitabGeneric.r") 
-
+source("minitabGeneric.r")
 
 # Initialise
-
 oldLikeX <- -Inf
 oldLikeY <- -Inf
 bk <- FALSE
@@ -50,7 +47,6 @@ accmove <- 0
 accloc <- 0
 
 # Specific output files
-
 filedata <- paste("datastate", d, ".txt", sep = "")
 cat(file=filedata,paste("data",1:ndata,sep=""), "\n")
 cat(file=filedata, obs[,4], "\n", append = TRUE)
@@ -60,7 +56,6 @@ cat(file=filediag, "acctraj", "accmove", "accloc","\n")
 cat(file=filediag, acctraj, accmove, accloc,"\n", append = TRUE)
 
 # Controls
-
 lenmin <- 3
 lenmax <- 6
 nbIter <- 1000

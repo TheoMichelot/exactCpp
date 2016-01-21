@@ -73,7 +73,6 @@ vProposalSD <- rep(0.1,nbState)
 SDP <- 0.15 # for "local update"
 
 # Other model-specific functions
-source("adaptive.r") # to create struct.fn
 source("switchRate.R") 
 source("updateMove_fisher.R")
 source("updateRate_fisher.R")
