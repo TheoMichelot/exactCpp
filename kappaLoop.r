@@ -122,7 +122,7 @@ for (iii in 1:nbIter)
         # compute distributions of next locations
         # (i.e. distribution of actual data points, to deduce likelihood)
         move <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,
-                         xx=subData[which,colX],yy=subData[which,colY])
+                        xx=subData[which,colX],yy=subData[which,colY])
         
         RWX <- dnorm(subData[indObs[-1],colX],
                      mean = subData[which,colX]+move$emx,
@@ -247,14 +247,14 @@ for (iii in 1:nbIter)
         deltaT <-  allData[whichInfo,colTime]-allData[whichInfo-1,colTime]
         
         moveStep <- updateMove(bpar, vpar, bHomog, bProposalSD, nbState, vHomog, vProposalSD, 
-                                mpar, mProposalSD, mPriorMean, mPriorSD, bPriorMean, bPriorSD, 
-                                vPriorMean, vPriorSD)
+                               mpar, mProposalSD, mPriorMean, mPriorSD, bPriorMean, bPriorSD, 
+                               vPriorMean, vPriorSD)
         
         # Old & new likelihoods
         
         oldMove <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,xx=preX,yy=preY)
         newMove <- rawMove(moveStep$mprime,moveStep$bprime,moveStep$vprime,state=states,
-                            deltaT=deltaT,xx=preX,yy=preY)
+                           deltaT=deltaT,xx=preX,yy=preY)
         
         oldLogLX <- sum(dnorm(dX,mean=oldMove$emx,sd=oldMove$sdx,log=TRUE))
         oldLogLY <- sum(dnorm(dY,mean=oldMove$emy,sd=oldMove$sdy,log=TRUE))
@@ -355,7 +355,7 @@ for (iii in 1:nbIter)
         
         if(runif(1)<exp(logHR)) { # accept local update (T2 to Tj)
             accloc <- accloc+1
-        
+            
             # index of switch "jorder-1" in aSwitches
             prev <- which(aSwitches[,colTime]==allData[jorder-1,colTime])
             
