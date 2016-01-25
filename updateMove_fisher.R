@@ -1,5 +1,7 @@
 
-#' Update movement
+#' Update movement parameters
+#' 
+#' Suggest new movement parameters from the proposal distributions.
 updateMove <- function(bpar, vpar, bHomog, bProposalSD, nbState, vHomog, vProposalSD, 
                        mpar, mProposalSD, mPriorMean, mPriorSD, bPriorMean, bPriorSD, 
                        vPriorMean, vPriorSD)
@@ -7,6 +9,7 @@ updateMove <- function(bpar, vpar, bHomog, bProposalSD, nbState, vHomog, vPropos
     breal <- log(bpar)
     vreal <- log(vpar)
     
+    # allow for homogeneous and non-homogeneous cases
     if(bHomog) {
         bprime <- breal+rnorm(1,0,bProposalSD)
         b1 <- breal[1]
