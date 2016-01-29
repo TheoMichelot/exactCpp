@@ -17,8 +17,6 @@ for (iii in 1:nbIter)
     # times and states of beginning and end
     Tbeg <- subObs[1,colTime]
     Tend <- subObs[len,colTime]
-    Sbeg <- subObs[1,colState]
-    Send <- subObs[len,colState]
     
     #################################
     ## Simulate potential switches ##
