@@ -8,7 +8,7 @@ for (iii in 1:nbIter)
     len <- sample(lenmin:lenmax,size=1)
     
     # indices of first and last selected obs
-    point1 <- sample(1:(ndata-len+1),size=1)
+    point1 <- sample(1:(nbObs-len+1),size=1)
     point2 <- point1+len-1
     
     # selected observations
@@ -366,7 +366,7 @@ for (iii in 1:nbIter)
     
     if(iii%%thin==0) {
         cat(file=filekappa,lambdapar,"\n", append = TRUE)
-        cat(file=filedata, obs[1:ndata,4], "\n", append = TRUE)
+        cat(file=filedata, obs[1:nbObs,4], "\n", append = TRUE)
     }
     
     # Diagnostics

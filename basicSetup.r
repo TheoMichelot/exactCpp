@@ -2,7 +2,7 @@
 
 obs <- cbind(as.matrix(read.table("fisherXYT.csv",sep=",",header=FALSE,skip=3)),NA,NA,NA,NA)
 colnames(obs) <- c("X","Y","Time","State","Habitat","Jump","Behav")
-ndata <- nrow(obs)
+nbObs <- nrow(obs)
 
 # Enable references by "name" 
 colX <- 1 # "X"

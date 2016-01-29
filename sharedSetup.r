@@ -9,7 +9,7 @@ AHswitch <- c()
 
 dt <- 0.1*min(diff(obs[,colTime]))
 
-for(kkk in 2:ndata) { 
+for(kkk in 2:nbObs) { 
     if( (obs[kkk,4]!=obs[kkk-1,4])) {
         ATswitch <- c(ATswitch,obs[kkk,3]-dt)
         ASswitch <- c(ASswitch,obs[kkk,4])
@@ -48,7 +48,7 @@ accloc <- 0
 
 # Specific output files
 filedata <- paste("datastate", d, ".txt", sep = "")
-cat(file=filedata,paste("data",1:ndata,sep=""), "\n")
+cat(file=filedata,paste("data",1:nbObs,sep=""), "\n")
 cat(file=filedata, obs[,4], "\n", append = TRUE)
 
 filediag <- paste("diagnostic", d, ".txt", sep = "")
