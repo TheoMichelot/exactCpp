@@ -62,17 +62,17 @@ for (iii in 1:nbIter)
                 Xfrom <- subData[t-1,colX]
                 Yfrom <- subData[t-1,colY]
                 
-                # compute distribution of next location (i.e. location j)
+                # compute distribution of next location (i.e. location t)
                 move <- rawMove(mpar,bpar,vpar,state=state,deltaT=deltaT,xx=Xfrom,yy=Yfrom)
                 
-                # simulate location j
+                # simulate location t
                 subData[t,colX] <- rnorm(1,mean=Xfrom+move$emx,sd=move$sdx)
                 subData[t,colY] <- rnorm(1,mean=Yfrom+move$emy,sd=move$sdy)
                 
-                # Mapping back on to known habitat
+                # map back on to known habitat
                 subData[t,colHabitat] <- findRegion(subData[t,colX],subData[t,colY],map)
                 
-                # Prob of actual switch depends on rates and on region
+                # prob of actual switch depends on rates and on region
                 probs <- switchRate(subData[t-1,colState],subData[t,colHabitat],lambdapar)/kappa
                 
                 jumpNow <- runif(1)<sum(probs) # is there a jump?
