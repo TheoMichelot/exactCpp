@@ -45,11 +45,11 @@ n2w <- function(par,nbState)
 #' 
 #' @param wpar Vector of parameters, in the order: m, b, v.
 #' @param nbState Number of states.
-n2w <- function(wpar,nbState)
+w2n <- function(wpar,nbState)
 {
-    m <- par[1:(2*nbState)]
-    b <- par[(2*nbState+1):(3*nbState)]
-    v <- par[(3*nbState+1):(4*nbState)]
+    m <- wpar[1:(2*nbState)]
+    b <- wpar[(2*nbState+1):(3*nbState)]
+    v <- wpar[(3*nbState+1):(4*nbState)]
     
     par <- c(m,exp(b),exp(v))
     return(par)
