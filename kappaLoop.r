@@ -62,7 +62,7 @@ for (iii in 1:nbIter)
                 Yfrom <- subData[t-1,colY]
                 
                 # compute distribution of next location (i.e. location t)
-                move <- rawMove(mpar,bpar,vpar,state=state,deltaT=deltaT,xx=Xfrom,yy=Yfrom)
+                move <- rawMove(par,state=state,deltaT=deltaT,x=Xfrom,y=Yfrom,nbState=nbState)
                 
                 # simulate location t
                 subData[t,colX] <- rnorm(1,mean=Xfrom+move$emx,sd=move$sdx)
@@ -118,8 +118,9 @@ for (iii in 1:nbIter)
         
         # compute distributions of next locations
         # (i.e. distribution of actual data points, to deduce likelihood)
-        move <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,
-                        xx=subData[which,colX],yy=subData[which,colY])
+        move <- rawMove(par,state=states,deltaT=deltaT,
+                        x=subData[which,colX],y=subData[which,colY],
+                        nbState=nbState)
         
         RWX <- dnorm(subData[indObs[-1],colX],
                      mean = subData[which,colX]+move$emx,
@@ -159,8 +160,9 @@ for (iii in 1:nbIter)
         tmpStates <- aSubData[aIndObs[-1]-1,colState]
         
         # compute distributions of next data point
-        aMove <- rawMove(mpar,bpar,vpar,state=tmpStates,deltaT=tmpDeltaT,
-                         xx=aSubData[aIndObs[-1]-1,colX],yy=aSubData[aIndObs[-1]-1,colY])
+        aMove <- rawMove(par,state=tmpStates,deltaT=tmpDeltaT,
+                         x=aSubData[aIndObs[-1]-1,colX],y=aSubData[aIndObs[-1]-1,colY],
+                         nbState=nbState)
         
         oldLikeX <- dnorm(aSubData[aIndObs[-1],colX],
                           mean = aSubData[aIndObs[-1]-1,colX]+aMove$emx,
@@ -225,7 +227,7 @@ for (iii in 1:nbIter)
     # order data in time
     ord <- order(allData[,colTime])
     allData <- allData[ord,]
-    
+
     if(runif(1)<prUpdateMove) # start of "if" on updating movement
     {   
         # Update movement parameters
@@ -236,22 +238,17 @@ for (iii in 1:nbIter)
         states <- allData[whichInfo-1,colState]
         
         # Calculate changes in position and time
-        
         preX <- allData[whichInfo-1,colX]
         dX <- allData[whichInfo,colX]-preX
         preY <- allData[whichInfo-1,colY]
         dY <- allData[whichInfo,colY]-preY
         deltaT <-  allData[whichInfo,colTime]-allData[whichInfo-1,colTime]
         
-        moveStep <- updateMove(bpar, vpar, bHomog, bProposalSD, nbState, vHomog, vProposalSD, 
-                               mpar, mProposalSD, mPriorMean, mPriorSD, bPriorMean, bPriorSD, 
-                               vPriorMean, vPriorSD)
+        moveStep <- updateMove(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog)
         
         # Old & new likelihoods
-        
-        oldMove <- rawMove(mpar,bpar,vpar,state=states,deltaT=deltaT,xx=preX,yy=preY)
-        newMove <- rawMove(moveStep$mprime,moveStep$bprime,moveStep$vprime,state=states,
-                           deltaT=deltaT,xx=preX,yy=preY)
+        oldMove <- rawMove(par,state=states,deltaT=deltaT,x=preX,y=preY,nbState=nbState)
+        newMove <- rawMove(moveStep$newPar,state=states,deltaT=deltaT,x=preX,y=preY,nbState=nbState)
         
         oldLogLX <- sum(dnorm(dX,mean=oldMove$emx,sd=oldMove$sdx,log=TRUE))
         oldLogLY <- sum(dnorm(dY,mean=oldMove$emy,sd=oldMove$sdy,log=TRUE))
@@ -264,14 +261,12 @@ for (iii in 1:nbIter)
         if(runif(1)<exp(logHR)) {
             # Accept movement parameters
             accmove <- accmove+1
-            mpar <- moveStep$mprime
-            bpar <- moveStep$bprime
-            vpar <- moveStep$vprime
+            par <- moveStep$newPar
         }
     } # end of "if" on updating movement
     
     if(iii%%thin==0)
-        cat(file=fileparams, round(mpar,6), round(bpar,6), round(vpar,6), "\n", append = TRUE)
+        cat(file=fileparams, round(par,6), "\n", append = TRUE)
     
     # update jump rate k
     if(!bk & nbActual>0)
@@ -309,12 +304,12 @@ for (iii in 1:nbIter)
         
         # Old log-likelihood
         
-        oldMove2 <- rawMove(mpar,bpar,vpar,state=S2,deltaT=T1-T2,xx=X2,yy=Y2)
+        oldMove2 <- rawMove(par,state=S2,deltaT=T1-T2,x=X2,y=Y2,nbState=nbState)
         
         oldLogLX2 <- dnorm(X1,mean=X2+oldMove2$emx,sd=oldMove2$sdx,log=TRUE)
         oldLogLY2 <- dnorm(Y1,mean=Y2+oldMove2$emy,sd=oldMove2$sdy,log=TRUE)
         
-        oldMove1 <- rawMove(mpar,bpar,vpar,state=S1,deltaT=Tj-T1,xx=X1,yy=Y1) 
+        oldMove1 <- rawMove(par,state=S1,deltaT=Tj-T1,x=X1,y=Y1,nbState=nbState) 
         
         oldLogLX1 <- dnorm(Xj,mean=X1+oldMove1$emx,sd=oldMove1$sdx,log=TRUE)
         oldLogLY1 <- dnorm(Yj,mean=Y1+oldMove1$emy,sd=oldMove1$sdy,log=TRUE)
@@ -335,12 +330,12 @@ for (iii in 1:nbIter)
         newHfactor <- rateNew[S1]/rate1[S1]
         
         # New log-likelihood
-        newMove2 <- rawMove(mpar,bpar,vpar,state=S2,deltaT=Tnew-T2,xx=X2,yy=Y2)
+        newMove2 <- rawMove(par,state=S2,deltaT=Tnew-T2,x=X2,y=Y2,nbState=nbState)
         
         newLogLX2 <- dnorm(Xnew,mean=X2+newMove2$emx,sd=newMove2$sdx,log=TRUE)
         newLogLY2 <- dnorm(Ynew,mean=Y2+newMove2$emy,sd=newMove2$sdy,log=TRUE)
         
-        newMove1 <- rawMove(mpar,bpar,vpar,state=S1,deltaT=Tj-Tnew,xx=Xnew,yy=Ynew) 
+        newMove1 <- rawMove(par,state=S1,deltaT=Tj-Tnew,x=Xnew,y=Ynew,nbState=nbState) 
         
         newLogLX1 <- dnorm(Xj,mean=Xnew+newMove1$emx,sd=newMove1$sdx,log=TRUE)
         newLogLY1 <- dnorm(Yj,mean=Ynew+newMove1$emy,sd=newMove1$sdy,log=TRUE)
