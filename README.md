@@ -1,6 +1,6 @@
 # moveMCMC
 
-Exact Bayesian inference for animal movement
+Exact Bayesian inference for animal movement in continuous time.
 
 ## References
 
