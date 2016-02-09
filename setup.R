@@ -38,27 +38,21 @@ obs[,colBehav] <- 0 # behavioural states not known
 ########################
 ## Initial parameters ##
 ########################
-# mpar <- rep(c(9,3.5),nbState) # centers of attraction
-mpar <- rep(c(9,3.5),1) # centers of attraction
+mpar <- rep(c(9,3.5),nbState) # centers of attraction
 bpar <- rep(1,nbState) # coefficients for matrix B
 vpar <- rep(10,nbState) # coefficients for matrix Lambda
 par <- c(mpar,bpar,vpar)
 
 # Priors (on log scale for b, v)
-# priorMean <- n2w(par,nbState)
-mPriorMean <- mpar
-bPriorMean <- log(bpar)
-vPriorMean <- log(vpar)
+priorMean <- n2w(par,nbState)
 
-# mPriorSD <- rep(c(0.7,0.7),nbState)
-mPriorSD <- rep(c(0.7,0.7),1)
+mPriorSD <- rep(c(0.7,0.7),nbState)
 bPriorSD <- rep(2.0,nbState)
 vPriorSD <- rep(2.0,nbState)
 priorSD <- c(mPriorSD,bPriorSD,vPriorSD)
 
 # MH proposals (on log scale for b, v)
-# mProposalSD <- rep(c(0.01,0.01),nbState)
-mProposalSD <- rep(c(0.01,0.01),1)
+mProposalSD <- rep(c(0.01,0.01),nbState)
 bProposalSD <- rep(0.2,nbState)
 vProposalSD <- rep(0.1,nbState)
 proposalSD <- c(mProposalSD,bProposalSD,vProposalSD)
