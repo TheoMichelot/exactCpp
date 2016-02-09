@@ -1,6 +1,5 @@
 
-source("basicSetup.r")
-source("sharedSetup.r")
+source("setup.R")
 
 for (iii in 1:nbIter)
 {
@@ -364,16 +363,11 @@ for (iii in 1:nbIter)
     } # end previous point imputed
     # else can't do anything locally
     
-    if(iii%%thin==0) {
+    if(iii%%thin==0)
         cat(file=filekappa,lambdapar,"\n", append = TRUE)
-        cat(file=filedata, obs[1:nbObs,4], "\n", append = TRUE)
-    }
     
-    # Diagnostics
-    if(iii%%thin==0) {
+    if(iii%%thin==0)
         cat("\nEnd iteration",iii,"\n")
-        cat(file=filediag, acctraj, accmove, accloc, "\n", append = TRUE)
-    }
     
     rm(allData)
     
