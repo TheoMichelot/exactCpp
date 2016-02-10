@@ -20,11 +20,16 @@ for (iii in 1:nbIter)
     ####################################
     ## Simulate movement and switches ##
     ####################################
-    step1 <- simMove(subObs,kappa,lambdapar,nbState)
-    subData <- step1$subData
-    indObs <- step1$indObs
-    indSwitch <- step1$indSwitch
-    bk <- step1$bk
+#     sim <- simMove(subObs,par,kappa,lambdapar,nbState)
+#     subData <- step1$subData
+#     indObs <- step1$indObs
+#     indSwitch <- step1$indSwitch
+#     bk <- step1$bk
+    sim <- simMove_rcpp(subObs,par,kappa,lambdapar,nbState,map)
+    subData <- sim[[1]]
+    indObs <- sim[[2]]
+    indSwitch <- sim[[3]]
+    bk <- sim[[4]]
     
     if(!bk) {
         # compute the likelihood of the trajectory

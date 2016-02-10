@@ -2,10 +2,12 @@
 #' Simulation movement and switches
 #' 
 #' @param subObs Observations between Tbeg and Tend
+#' @param par Vector of parameters (m,b,v)
 #' @param kappa Maximum switching rate
 #' @param lambdapar Vector of non-diagonal switching rates, row-wise
 #' @param nbState Number of states
-simMove <- function(subObs,kappa,lambdapar,nbState)
+#' @param map Map of habitat (matrix)
+simMove <- function(subObs,par,kappa,lambdapar,nbState,map)
 {
     # enable references by "name" 
     colX <- 1; colY <- 2; colTime <- 3; colState <- 4; colHabitat <- 5; colJump <- 6; colBehav <- 7
