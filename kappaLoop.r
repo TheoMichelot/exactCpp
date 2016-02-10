@@ -27,6 +27,7 @@ for (iii in 1:nbIter)
     bk <- step1$bk
     
     if(!bk) {
+        # compute the likelihood of the trajectory
         HR <- moveLike(subData,indObs,indSwitch,par,aSwitches,nbState)
         
         if(runif(1)<HR) {
@@ -56,7 +57,7 @@ for (iii in 1:nbIter)
                 orderA <- order(aSwitches[,colTime])
                 aSwitches <- aSwitches[orderA,,drop=FALSE]
             }
-        } # end of "if accept trajectory"
+        }
     }
     
     nbActual <- nrow(aSwitches) # this nbActual has been updated to match new aSwitches
@@ -78,9 +79,11 @@ for (iii in 1:nbIter)
     ord <- order(allData[,colTime])
     allData <- allData[ord,]
     
+    # parameter update
     if(runif(1)<prUpdateMove)
         par <- updatePar(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
     
+    # print parameters to file
     if(iii%%thin==0)
         cat(file=fileparams, round(par,6), "\n", append = TRUE)
     
@@ -100,6 +103,7 @@ for (iii in 1:nbIter)
     if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
         aSwitches <- localUpdate(allData,aSwitches,jorder,par,lambdapar,kappa,nbState,SDP,map)
     
+    # print switching rates to file
     if(iii%%thin==0)
         cat(file=filekappa,lambdapar,"\n", append = TRUE)
     
