@@ -6,25 +6,24 @@ source("updateRate_fisher.R")
 source("rawMove.R")
 source("utilities.R")
 
+source("simMove.R")
+source("moveLike.R")
+source("updatePar.R")
+source("localUpdate.R")
+
 ###############
 ## Read data ##
 ###############
 # observations
-obs <- cbind(as.matrix(read.table("fisherXYT.csv",sep=",",header=FALSE,skip=3)),NA,NA,NA,NA)
+obs <- cbind(as.matrix(read.csv("fisherXYT.csv",header=FALSE,skip=3)),NA,NA,NA,NA)
 colnames(obs) <- c("X","Y","Time","State","Habitat","Jump","Behav")
 nbObs <- nrow(obs)
 
 # enable references by "name" 
-colX <- 1
-colY <- 2
-colTime <- 3
-colState <- 4
-colHabitat <- 5
-colJump <- 6
-colBehav <- 7
+colX <- 1; colY <- 2; colTime <- 3; colState <- 4; colHabitat <- 5; colJump <- 6; colBehav <- 7
 
 # map
-map <- as.matrix(read.table("habitat.csv",sep=",",header=FALSE,skip=3))
+map <- as.matrix(read.csv("habitat.csv",header=FALSE,skip=3))
 
 nbHabitat <- length(unique(c(map))) # count habitat types
 nbState <- nbHabitat

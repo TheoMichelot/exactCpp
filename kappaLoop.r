@@ -17,165 +17,17 @@ for (iii in 1:nbIter)
     Tbeg <- subObs[1,colTime]
     Tend <- subObs[len,colTime]
     
-    #################################
-    ## Simulate potential switches ##
-    #################################
-    # number of potential switches
-    nbSwitch <- rpois(1,(Tend-Tbeg)*kappa)
-    
-    # initialize simulated switches
-    switches <- cbind(X=rep(NA,nbSwitch),
-                      Y=rep(NA,nbSwitch),
-                      Time=sort(runif(nbSwitch,Tbeg,Tend)), # Poisson process -> uniformly distributed
-                      State=rep(NA,nbSwitch),
-                      Habitat=rep(NA,nbSwitch),
-                      Jump=rep(NA,nbSwitch),
-                      Behav=rep(0,nbSwitch))
-    
-    # all simulated switches are in the first part, data are in second part
-    subData <- rbind(switches,subObs)
-    
-    # ranks of data by time
-    ranks <- rank(subData[,colTime])
-    # indices of potential switches among observations
-    indSwitch <- ranks[1:nbSwitch]
-    # indices of observations among potential switches
-    indObs <- ranks[(nbSwitch+1):nrow(subData)]
-    
-    # order data in time
-    ord <- order(subData[,colTime])
-    subData <- subData[ord,]
+    ####################################
+    ## Simulate movement and switches ##
+    ####################################
+    step1 <- simMove(subObs,kappa,lambdapar,nbState)
+    subData <- step1$subData
+    indObs <- step1$indObs
+    indSwitch <- step1$indSwitch
+    bk <- step1$bk
     
     if(!bk) {
-        
-        ####################################
-        ## Simulate movement and switches ##
-        ####################################  
-        for (t in 2:nrow(subData)) {
-            
-            # data point or potential jump? potential jump has Habitat NA
-            if( is.na(subData[t,colHabitat]) ) {
-                state <- subData[t-1,colState] # state prior to t
-                deltaT <- subData[t,colTime]-subData[t-1,colTime] # time interval between t and its predecessor
-                
-                Xfrom <- subData[t-1,colX]
-                Yfrom <- subData[t-1,colY]
-                
-                # compute distribution of next location (i.e. location t)
-                move <- rawMove(par,state=state,deltaT=deltaT,x=Xfrom,y=Yfrom,nbState=nbState)
-                
-                # simulate location t
-                subData[t,colX] <- rnorm(1,mean=Xfrom+move$emx,sd=move$sdx)
-                subData[t,colY] <- rnorm(1,mean=Yfrom+move$emy,sd=move$sdy)
-                
-                # map back on to known habitat
-                subData[t,colHabitat] <- findRegion(subData[t,colX],subData[t,colY],map)
-                
-                # prob of actual switch depends on rates and on region
-                probs <- switchRate(subData[t-1,colState],subData[t,colHabitat],lambdapar)/kappa
-                
-                jumpNow <- runif(1)<sum(probs) # is there a jump?
-                
-                if(jumpNow)
-                    subData[t,colState] <- successor(probs) # pick state of successor in case of jump
-                else
-                    subData[t,colState] <- subData[t-1,colState] # keep previous state if no jump
-                
-                subData[t,colJump] <- as.integer(jumpNow)
-                
-            } else {
-                # we have a data point
-                
-                if( (t==nrow(subData) | subData[t,colBehav]==1) & 
-                    (subData[t-1,colState] != subData[t,colState]) ) {
-                    # state at Tend cannot be changed
-                    
-                    bk <- TRUE
-                    break            
-                }
-                
-                # data point state is always same as previous  and no jump
-                subData[t,colState] <- subData[t-1,colState]  
-            }
-            
-        } # End of loop over t>=2
-    }
-    
-    if(!bk) {
-        ################
-        ## Likelihood ##
-        ################
-        
-        ## 1. Likelihood with potential switches
-        
-        # intervals between data points (except 1st one) and previous switches
-        deltaT <- subData[indObs[-1],colTime] - subData[indObs[-1]-1,colTime]
-        
-        # states at each switch preceding a data point
-        states <- subData[indObs[-1]-1,colState] 
-        # index of each switch preceding a data point
-        which <- indObs[-1]-1
-        
-        # compute distributions of next locations
-        # (i.e. distribution of actual data points, to deduce likelihood)
-        move <- rawMove(par,state=states,deltaT=deltaT,
-                        x=subData[which,colX],y=subData[which,colY],
-                        nbState=nbState)
-        
-        RWX <- dnorm(subData[indObs[-1],colX],
-                     mean = subData[which,colX]+move$emx,
-                     sd = move$sdx,
-                     log = TRUE)
-        
-        RWY <- dnorm(subData[indObs[-1],colY],
-                     mean = subData[which,colY]+move$emy,
-                     sd = move$sdy,
-                     log = TRUE)
-        
-        ## 2. Likelihood with actual switches
-        
-        # indices of "actual switches" happening between Tbeg and Tend
-        whichActual <- which(aSwitches[,colTime]<Tend & aSwitches[,colTime]>Tbeg)
-        
-        # number of those switches
-        nbActual <- length(whichActual)
-        
-        # Actual switches and observations between Tbeg and Tend
-        aSubData <- rbind(aSwitches[whichActual,],subObs)
-        
-        # ranks of data by time
-        aRanks <- rank(aSubData[,colTime])
-        # indices of actual switches among observations
-        aIndSwitch <- aRanks[1:nbActual]
-        # indices of observations among actual switches
-        aIndObs <- aRanks[(nbActual+1):nrow(aSubData)]
-        
-        # order data in time
-        ord <- order(aSubData[,colTime])
-        aSubData <- aSubData[ord,]
-        
-        # intervals between obs and predecessors
-        tmpDeltaT <- aSubData[aIndObs[-1],colTime] - aSubData[aIndObs[-1]-1,colTime]
-        # states of predecessors
-        tmpStates <- aSubData[aIndObs[-1]-1,colState]
-        
-        # compute distributions of next data point
-        aMove <- rawMove(par,state=tmpStates,deltaT=tmpDeltaT,
-                         x=aSubData[aIndObs[-1]-1,colX],y=aSubData[aIndObs[-1]-1,colY],
-                         nbState=nbState)
-        
-        oldLikeX <- dnorm(aSubData[aIndObs[-1],colX],
-                          mean = aSubData[aIndObs[-1]-1,colX]+aMove$emx,
-                          sd = aMove$sdx,
-                          log=TRUE)
-        
-        oldLikeY <- dnorm(aSubData[aIndObs[-1],colY],
-                          mean = aSubData[aIndObs[-1]-1,colY]+aMove$emy,
-                          sd = aMove$sdy,
-                          log=TRUE)
-        
-        # Hastings ratio
-        HR <- exp(sum(RWX+RWY)-sum(oldLikeX+oldLikeY))
+        HR <- moveLike(subData,indObs,indSwitch,par,aSwitches,nbState)
         
         if(runif(1)<HR) {
             #######################
@@ -204,17 +56,15 @@ for (iii in 1:nbIter)
                 orderA <- order(aSwitches[,colTime])
                 aSwitches <- aSwitches[orderA,,drop=FALSE]
             }
-            
-            acctraj <- acctraj+1         
-        } # end of "if accept trajectory"      
-    } # end of "if(!bk)" 
+        } # end of "if accept trajectory"
+    }
     
     nbActual <- nrow(aSwitches) # this nbActual has been updated to match new aSwitches
     
     ################################
     ## Update movement parameters ##
     ################################
-    
+    # actual switches and observations
     allData <- rbind(aSwitches,obs)
     
     # ranks of data by time
@@ -227,43 +77,9 @@ for (iii in 1:nbIter)
     # order data in time
     ord <- order(allData[,colTime])
     allData <- allData[ord,]
-
-    if(runif(1)<prUpdateMove) # start of "if" on updating movement
-    {   
-        # Update movement parameters
-        # Pick out points that are informative about movement,
-        # their predecessors, and the states during movement
-        
-        whichInfo <- which(allData[,colTime]>min(obs[,colTime]))
-        states <- allData[whichInfo-1,colState]
-        
-        # Calculate changes in position and time
-        preX <- allData[whichInfo-1,colX]
-        dX <- allData[whichInfo,colX]-preX
-        preY <- allData[whichInfo-1,colY]
-        dY <- allData[whichInfo,colY]-preY
-        deltaT <-  allData[whichInfo,colTime]-allData[whichInfo-1,colTime]
-        
-        moveStep <- updateMove(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog)
-        
-        # Old & new likelihoods
-        oldMove <- rawMove(par,state=states,deltaT=deltaT,x=preX,y=preY,nbState=nbState)
-        newMove <- rawMove(moveStep$newPar,state=states,deltaT=deltaT,x=preX,y=preY,nbState=nbState)
-        
-        oldLogLX <- sum(dnorm(dX,mean=oldMove$emx,sd=oldMove$sdx,log=TRUE))
-        oldLogLY <- sum(dnorm(dY,mean=oldMove$emy,sd=oldMove$sdy,log=TRUE))
-        
-        newLogLX <- sum(dnorm(dX,mean=newMove$emx,sd=newMove$sdx,log=TRUE))
-        newLogLY <- sum(dnorm(dY,mean=newMove$emy,sd=newMove$sdy,log=TRUE))
-        
-        logHR <- moveStep$newLogPrior-moveStep$oldLogPrior+newLogLX+newLogLY-oldLogLX-oldLogLY
-        
-        if(runif(1)<exp(logHR)) {
-            # Accept movement parameters
-            accmove <- accmove+1
-            par <- moveStep$newPar
-        }
-    } # end of "if" on updating movement
+    
+    if(runif(1)<prUpdateMove)
+        par <- updatePar(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
     
     if(iii%%thin==0)
         cat(file=fileparams, round(par,6), "\n", append = TRUE)
@@ -272,91 +88,17 @@ for (iii in 1:nbIter)
     if(!bk & nbActual>0)
         lambdapar <- updateRate(allData, indSwitchAll, kappa, shape1, shape2)
     
-    bk <- FALSE  
+    bk <- FALSE
     
     #########################
     ## Insert local update ##
     #########################
-    
     # Local update to predecessor to obs j
     j <- sample(2:nrow(obs),size=1)
     jorder <- indObsAll[j]
     
-    if((jorder-1)%in%indSwitchAll) # Should be moveable
-    {
-        # Want to perturb (T,X,Y)[jorder-1]
-        
-        T2 <- allData[jorder-2,colTime]
-        X2 <- allData[jorder-2,colX]
-        Y2 <- allData[jorder-2,colY]
-        S2 <- allData[jorder-2,colState]
-        
-        T1 <- allData[jorder-1,colTime]
-        X1 <- allData[jorder-1,colX]
-        Y1 <- allData[jorder-1,colY]
-        S1 <- allData[jorder-1,colState]
-        
-        H1 <- findRegion(X1,Y1,map)
-        
-        Tj <- allData[jorder,colTime]
-        Xj <- allData[jorder,colX]
-        Yj <- allData[jorder,colY]
-        
-        # Old log-likelihood
-        
-        oldMove2 <- rawMove(par,state=S2,deltaT=T1-T2,x=X2,y=Y2,nbState=nbState)
-        
-        oldLogLX2 <- dnorm(X1,mean=X2+oldMove2$emx,sd=oldMove2$sdx,log=TRUE)
-        oldLogLY2 <- dnorm(Y1,mean=Y2+oldMove2$emy,sd=oldMove2$sdy,log=TRUE)
-        
-        oldMove1 <- rawMove(par,state=S1,deltaT=Tj-T1,x=X1,y=Y1,nbState=nbState) 
-        
-        oldLogLX1 <- dnorm(Xj,mean=X1+oldMove1$emx,sd=oldMove1$sdx,log=TRUE)
-        oldLogLY1 <- dnorm(Yj,mean=Y1+oldMove1$emy,sd=oldMove1$sdy,log=TRUE)
-        
-        oldLL <- oldLogLX1+oldLogLY1+oldLogLX2+oldLogLY2  
-        
-        # Propose new location
-        Xnew <- rnorm(1,mean=X1,sd=SDP)
-        Ynew <- rnorm(1,mean=Y1,sd=SDP)
-        Tnew <- runif(1,min=T2,max=Tj)
-        Hnew <- findRegion(Xnew,Ynew,map)
-        
-        # Effect of habitat
-        rate1 <- switchRate(S2,H1,lambdapar)
-        rate1[S2] <- kappa-sum(rate1)
-        rateNew <- switchRate(S2,Hnew,lambdapar)
-        rateNew[S2] <- kappa-sum(rateNew)
-        newHfactor <- rateNew[S1]/rate1[S1]
-        
-        # New log-likelihood
-        newMove2 <- rawMove(par,state=S2,deltaT=Tnew-T2,x=X2,y=Y2,nbState=nbState)
-        
-        newLogLX2 <- dnorm(Xnew,mean=X2+newMove2$emx,sd=newMove2$sdx,log=TRUE)
-        newLogLY2 <- dnorm(Ynew,mean=Y2+newMove2$emy,sd=newMove2$sdy,log=TRUE)
-        
-        newMove1 <- rawMove(par,state=S1,deltaT=Tj-Tnew,x=Xnew,y=Ynew,nbState=nbState) 
-        
-        newLogLX1 <- dnorm(Xj,mean=Xnew+newMove1$emx,sd=newMove1$sdx,log=TRUE)
-        newLogLY1 <- dnorm(Yj,mean=Ynew+newMove1$emy,sd=newMove1$sdy,log=TRUE)
-        
-        newLL <- newLogLX1+newLogLY1+newLogLX2+newLogLY2  
-        
-        logHR <- newLL-oldLL+log(newHfactor)
-        # Calc needs to be done in this order, to avoid special case: exp(newLL-oldLL)=Inf, Hfactor=0
-        
-        if(runif(1)<exp(logHR)) { # accept local update (T2 to Tj)
-            accloc <- accloc+1
-            
-            # index of switch "jorder-1" in aSwitches
-            prev <- which(aSwitches[,colTime]==allData[jorder-1,colTime])
-            
-            aSwitches[prev,colTime] <- Tnew
-            aSwitches[prev,colX] <- Xnew
-            aSwitches[prev,colY] <- Ynew
-        } # end accept
-    } # end previous point imputed
-    # else can't do anything locally
+    if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
+        aSwitches <- localUpdate(allData,aSwitches,jorder,par,lambdapar,kappa,nbState,SDP,map)
     
     if(iii%%thin==0)
         cat(file=filekappa,lambdapar,"\n", append = TRUE)
@@ -365,5 +107,4 @@ for (iii in 1:nbIter)
         cat("\nEnd iteration",iii,"\n")
     
     rm(allData)
-    
-} # end of for loop niter
+}
