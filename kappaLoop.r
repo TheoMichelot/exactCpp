@@ -20,15 +20,12 @@ for (iii in 1:nbIter)
     ####################################
     ## Simulate movement and switches ##
     ####################################
-#     sim <- simMove(subObs,par,kappa,lambdapar,nbState)
-#     subData <- step1$subData
-#     indObs <- step1$indObs
-#     indSwitch <- step1$indSwitch
-#     bk <- step1$bk
     sim <- simMove_rcpp(subObs,par,kappa,lambdapar,nbState,map)
     subData <- sim[[1]]
     indObs <- sim[[2]]
+    indObs <- indObs[order(indObs)]
     indSwitch <- sim[[3]]
+    indSwitch <- indSwitch[order(indSwitch)]
     bk <- sim[[4]]
     
     if(!bk) {
@@ -44,7 +41,7 @@ for (iii in 1:nbIter)
             switches <- subData[c(0,indSwitch),,drop=FALSE]
             
             # Update Data states
-            obs[obs[,colTime]>(Tbeg-0.1) & obs[,colTime]<(Tend+0.1),colState] <- subData[indObs,colState]
+            obs[obs[,colTime]>=Tbeg & obs[,colTime]<=Tend,colState] <- subData[indObs,colState]
             
             # data's jump do not need updating it is always 0
             

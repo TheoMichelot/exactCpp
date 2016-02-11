@@ -36,9 +36,9 @@ int mysample(arma::vec probs)
     int k = 0;
     double s = 0;
     double rand = R::runif(0,1);
-    while(s<rand) {
-        k = k+1;
+    while(s<rand && k<probs.size()) {
         s = s + probs(k);
+        k = k+1;
     }
     
     return k;
@@ -60,8 +60,6 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     //=============================//
     // number of potential switches
     int nbSwitch = R::rpois((Tend-Tbeg)*kappa);
-    
-    cout << "1" << endl;
     
     // initialize potential switches
     arma::mat switches = arma::mat(nbSwitch,7).fill(NA_REAL);
@@ -129,8 +127,9 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             }
             
             // probabilities of actual switch
-            arma::vec probs(nbState,0);
-            probs(subData(t,colHabitat)) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
+            arma::vec probs(nbState);
+            probs.zeros();
+            probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
             
             bool jumpNow = (R::runif(0,1)<sum(probs));
             
@@ -157,8 +156,8 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     
     List res(4);
     res[0] = subData;
-    res[1] = indObs;
-    res[2] = indSwitch;
+    res[1] = indObs+1;
+    res[2] = indSwitch+1;
     res[3] = bk;
     
     return(res);

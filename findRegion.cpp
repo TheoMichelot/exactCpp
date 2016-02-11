@@ -18,13 +18,13 @@ int findRegion(double x, double y, arma::mat map)
     // keep coordinates within map limits
     if(xi<0) 
         xi = 0;
-    else if(xi>=map.n_cols) 
-        xi = map.n_cols-1;
-
+    else if(xi>=map.n_rows) 
+        xi = map.n_rows-1;
+    
     if(yi<0)
         yi = 0;
-    else if(yi>=map.n_rows)
-        yi = map.n_rows-1;
-
+    else if(yi>=map.n_cols)
+        yi = map.n_cols-1;
+    
     return map(xi,yi);
 }
