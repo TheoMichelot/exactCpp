@@ -35,3 +35,39 @@ int mysample(arma::vec probs)
     
     return k;
 }
+
+//' Natural to working
+//' 
+//' Transforms the parameters from the natural scale to the working scale.
+//' 
+//' @param par Vector of parameters, in the order: m, b, v.
+//' @param nbState Number of states.
+arma::vec n2w(arma::vec par, int nbState)
+{
+    arma::vec wpar(par.size());
+    
+    for(int i=0 ; i<2*nbState ; i++)
+        wpar(i) = par(i); // m
+    for(int i=2*nbState ; i<4*nbState ; i++)
+        wpar(i) = log(par(i)); // log(b) and log(v)
+    
+    return(wpar); // wpar = c(m,log(b),log(v))
+}
+
+//' Working to natural
+//' 
+//' Transforms the parameters from the working scale to the natural scale.
+//' 
+//' @param wpar Vector of parameters, in the order: m, b, v.
+//' @param nbState Number of states.
+arma::vec w2n(arma::vec wpar, int nbState)
+{
+    arma::vec par(par.size());
+    
+    for(int i=0 ; i<2*nbState ; i++)
+        par(i) = wpar(i); // m
+    for(int i=2*nbState ; i<4*nbState ; i++)
+        par(i) = exp(wpar(i)); // exp(b) and exp(v)
+    
+    return(par); // wpar = c(m,exp(b),exp(v))
+}

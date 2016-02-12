@@ -15,6 +15,7 @@ library(Rcpp)
 library(RcppArmadillo)
 sourceCpp("simMove.cpp")
 sourceCpp("moveLike.cpp")
+sourceCpp("updatePar.cpp")
 
 ###############
 ## Read data ##

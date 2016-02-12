@@ -62,15 +62,15 @@ updateMove <- function(par,priorMean,priorSD,proposalSD,nbState,mHomog=FALSE,bHo
         v1 <- v
         v2 <- vprime
     }
-    
+
     # Old log prior
-    oldLogPrior <- sum(dnorm(m,mPriorMean,mPriorSD,log=TRUE))+
-        sum(dnorm(b1,bPriorMean,bPriorSD,log=TRUE))+
+    oldLogPrior <- sum(dnorm(m1,mPriorMean,mPriorSD,log=TRUE)) + 
+        sum(dnorm(b1,bPriorMean,bPriorSD,log=TRUE)) + 
         sum(dnorm(v1,vPriorMean,vPriorSD,log=TRUE))
     
     # New log prior
-    newLogPrior <- sum(dnorm(mprime,mPriorMean,mPriorSD,log=TRUE))+
-        sum(dnorm(b2,bPriorMean,bPriorSD,log=TRUE))+
+    newLogPrior <- sum(dnorm(m2,mPriorMean,mPriorSD,log=TRUE)) + 
+        sum(dnorm(b2,bPriorMean,bPriorSD,log=TRUE)) + 
         sum(dnorm(v2,vPriorMean,vPriorSD,log=TRUE))
     
     newPar <- w2n(c(mprime,bprime,vprime),nbState)

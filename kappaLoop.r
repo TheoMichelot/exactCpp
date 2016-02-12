@@ -82,8 +82,14 @@ for (iii in 1:nbIter)
     allData <- allData[ord,]
     
     # parameter update
-    if(runif(1)<prUpdateMove)
-        par <- updatePar(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
+    if(runif(1)<prUpdateMove) {
+        par <- updatePar(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
+        par2 <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
+        
+        print(par)
+        print(par2)
+        stop()
+    }
     
     # print parameters to file
     if(iii%%thin==0)
