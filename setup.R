@@ -14,6 +14,7 @@ source("localUpdate.R")
 library(Rcpp)
 library(RcppArmadillo)
 sourceCpp("simMove.cpp")
+sourceCpp("moveLike.cpp")
 
 ###############
 ## Read data ##

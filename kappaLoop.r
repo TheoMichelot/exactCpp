@@ -30,8 +30,8 @@ for (iii in 1:nbIter)
     
     if(!bk) {
         # compute the likelihood of the trajectory
-        HR <- moveLike(subData,indObs,indSwitch,par,aSwitches,nbState)
-        
+        HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState)
+
         if(runif(1)<HR) {
             #######################
             ## Accept trajectory ##
