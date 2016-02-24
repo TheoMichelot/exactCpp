@@ -102,10 +102,8 @@ for (iii in 1:nbIter)
     j <- sample(2:nrow(obs),size=1)
     jorder <- indObsAll[j]
     
-    if((jorder-1)%in%indSwitchAll) { # should be moveable, else can't do anything locally
-        aSwitches <- localUpdate(allData,aSwitches,jorder,par,lambdapar,kappa,nbState,SDP,map)
-        aSwitches2 <- localUpdate_rcpp()
-    }
+    if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
+        aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,lambdapar,kappa,nbState,SDP,map)
     
     # print switching rates to file
     if(iii%%thin==0)

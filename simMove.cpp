@@ -25,6 +25,8 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     //=============================//
     // number of potential switches
     int nbSwitch = R::rpois((Tend-Tbeg)*kappa);
+    if(nbSwitch==0)
+        nbSwitch = 1; // code cannot deal with nbSwitch==0; to be fixed?
     
     // initialize potential switches
     arma::mat switches = arma::mat(nbSwitch,7).fill(NA_REAL);
@@ -38,11 +40,12 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     
     // ranks of data by time
     arma::uvec ranks = myrank(subData.col(colTime));
+    
     // indices of potential switches among observations
     arma::uvec indSwitch = ranks(arma::span(0,nbSwitch-1));
     // indices of observations among potential switches
     arma::uvec indObs = ranks(arma::span(nbSwitch,nbSwitch+len-1));
-    
+
     // order data in time
     arma::mat subDataCopy = subData;
     arma::uvec orders = sort_index(subData.col(colTime));
@@ -121,8 +124,8 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     
     List res(4);
     res[0] = subData;
-    res[1] = indObs+1;
-    res[2] = indSwitch+1;
+    res[1] = indObs+1; // +1 for compatibility with R
+    res[2] = indSwitch+1; // idem
     res[3] = bk;
     
     return(res);
