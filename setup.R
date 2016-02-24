@@ -1,15 +1,7 @@
 
-source("switchRate.R")
 source("minitabGeneric.r")
-source("updateMove_fisher.R")
 source("updateRate_fisher.R")
-source("rawMove.R")
 source("utilities.R")
-
-source("simMove.R")
-source("moveLike.R")
-source("updatePar.R")
-source("localUpdate.R")
 
 library(Rcpp)
 library(RcppArmadillo)
