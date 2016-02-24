@@ -20,12 +20,16 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     while(allData(indMin,colTime)<=obs(0,colTime))
         indMin = indMin + 1;
     
-    arma::mat allData2 = allData.rows(arma::span(indMin,allData.n_rows));
+    arma::mat allData2 = allData.rows(arma::span(indMin,allData.n_rows-1));
     int l = allData2.n_rows;
     
     // calculate changes in position and time
     arma::vec preX(l), preY(l), dX(l), dY(l);
-    for(int i=0 ; i<l ; i++) {
+    preX(0) = allData(indMin-1,colX);
+    dX(0) = allData2(0,colX) - preX(0);
+    preY(0) = allData(indMin-1,colY);
+    dY(0) = allData2(0,colY) - preY(0);
+    for(int i=1 ; i<l ; i++) {
         preX(i) = allData2(i-1,colX);
         dX(i) = allData2(i,colX) - preX(i);
         preY(i) = allData2(i-1,colY);
@@ -43,8 +47,17 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     
     for(int i=0 ; i<l ; i++) {
         int which = i-1; // index of previous switch
-        double deltaT = allData2(which+1,colTime) - allData2(which,colTime); // interval between switch and obs
-        int state = allData2(which,colState); // state at previous switch
+        double deltaT; // interval between switch and obs
+        int state; // state at previous switch
+        
+        if(i>0) {
+            deltaT = allData2(which+1,colTime) - allData2(which,colTime);
+            state = allData2(which,colState);
+        }
+        else {
+            deltaT = allData2(which+1,colTime) - allData(indMin-1,colTime);
+            state = allData(indMin-1,colState);
+        }
         
         oldMove = rawMove(par,state,deltaT,preX(i),preY(i),nbState);
         newMove = rawMove(newPar,state,deltaT,preX(i),preY(i),nbState);

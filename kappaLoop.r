@@ -82,14 +82,8 @@ for (iii in 1:nbIter)
     allData <- allData[ord,]
     
     # parameter update
-    if(runif(1)<prUpdateMove) {
-        par <- updatePar(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
-        par2 <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
-        
-        print(par)
-        print(par2)
-        stop()
-    }
+    if(runif(1)<prUpdateMove)
+        par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
     
     # print parameters to file
     if(iii%%thin==0)
@@ -108,8 +102,10 @@ for (iii in 1:nbIter)
     j <- sample(2:nrow(obs),size=1)
     jorder <- indObsAll[j]
     
-    if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
+    if((jorder-1)%in%indSwitchAll) { # should be moveable, else can't do anything locally
         aSwitches <- localUpdate(allData,aSwitches,jorder,par,lambdapar,kappa,nbState,SDP,map)
+        aSwitches2 <- localUpdate_rcpp()
+    }
     
     # print switching rates to file
     if(iii%%thin==0)
