@@ -80,7 +80,7 @@ prUpdateMove <- 1
 d <- format(Sys.time(), "%Y-%m-%d-%H%M")
 fileparams <- paste("params", d, ".txt", sep = "")
 
-cat(file=fileparams, "mux","muy","b1","b2","b3","v1","v2","v3", "\n")
+cat(file=fileparams, "mux1","muy1","mux2","muy2","mux3","muy3","b1","b2","b3","v1","v2","v3", "\n")
 cat(file=fileparams, mpar,bpar,vpar, "\n", append = TRUE)
 
 filekappa <- paste("rates", d, ".txt", sep = "")
@@ -115,5 +115,5 @@ accloc <- 0
 # Controls
 lenmin <- 3
 lenmax <- 6
-nbIter <- 1000
+nbIter <- 5000000
 thin <- 100

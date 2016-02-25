@@ -1,6 +1,4 @@
 
-source("setup.R")
-
 for (iii in 1:nbIter)
 {
     # length of considered interval of observations
