@@ -6,7 +6,8 @@
 #include <rawMove.cpp>
 #include <findRegion.cpp>
 
-using namespace std;
+#include <iostream>
+
 using namespace Rcpp;
 
 // [[Rcpp::export]]
@@ -72,7 +73,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             double emy = move(1);
             double sdx = move(2);
             double sdy = move(3);
-            
+
             // simulate location at time t
             subData(t,colX) = R::rnorm(Xfrom+emx,sdx);
             subData(t,colY) = R::rnorm(Yfrom+emy,sdy);
@@ -95,9 +96,11 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             }
             
             // probabilities of actual switch
+            // TODO: change for more general code
             arma::vec probs(nbState);
             probs.zeros();
             probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
+            probs = probs/kappa;
             
             bool jumpNow = (R::runif(0,1)<sum(probs));
             
@@ -117,6 +120,8 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             
             if(check1 && check2) // if state at Tend cannot be changed
                 bk = true;
+            else
+                subData(t,colState) = subData(t-1,colState);
         }
         
         t = t+1;

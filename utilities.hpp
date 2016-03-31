@@ -28,6 +28,11 @@ int mysample(arma::vec probs)
     int k = 0;
     double s = 0;
     double rand = R::runif(0,1);
+    
+    // only works if the probs sum to 1, unlike R's sample
+    if(sum(probs)!=1)
+        probs = probs/sum(probs);
+    
     while(s<rand && k<probs.size()) {
         s = s + probs(k);
         k = k+1;
