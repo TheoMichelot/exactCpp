@@ -37,7 +37,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     
     arma::vec oldMove1 = rawMove(par,S1,Tj-T1,X1,Y1,nbState);
     double oldLogLX1 = R::dnorm(Xj,X1+oldMove1(0),oldMove1(2),1);
-    double oldLogLY1 = R::dnorm(Yj,Y1+oldMove1(2),oldMove1(3),1);
+    double oldLogLY1 = R::dnorm(Yj,Y1+oldMove1(1),oldMove1(3),1);
     
     double oldLogL = oldLogLX1 + oldLogLY1 + oldLogLX2 + oldLogLY2;
     
@@ -48,7 +48,30 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     int Hnew = findRegion(Xnew,Ynew,map);
     
     // effect of habitat
-    // ??
+//     // matrix of switching rates
+//     arma::mat A(nbState,nbState);
+//     int k = 0;
+//     for(int i=0 ; i<nbState ; i++) {
+//         for(int j=0 ; j<nbState ; j++) {
+//             if(i==j)
+//                 A(i,j) = 0; // diagonal is zero
+//             else {
+//                 A(i,j) = lambdapar(k); // switching rate i -> j
+//                 k = k+1;
+//             }
+//         }
+//     }
+//     
+//     // probabilities of actual switch
+//     // TODO: change for more general code
+//     arma::vec rate1(nbState);
+//     rate1.zeros();
+//     rate1(H1-1) = A(S2-1,H1-1);
+//     arma::vec rateNew(nbState);
+//     rateNew.zeros();
+//     rateNew(Hnew-1) = A(S2-1,Hnew-1);
+//     double newHfactor = rateNew(S1-1)/rate1(S1-1);
+    double newHfactor = 1;
     
     // new log-likelihood
     arma::vec newMove2 = rawMove(par,S2,Tnew-T2,X2,Y2,nbState);
@@ -62,17 +85,17 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     double newLogL = newLogLX1 + newLogLY1 + newLogLX2 + newLogLY2;
     
     // log Hastings ratio
-    double logHR = newLogL - oldLogL;
-    
+    double logHR = newLogL - oldLogL + log(newHfactor);
+
     // if the local update is accepted
     if(R::runif(0,1)<exp(logHR)) {
-        int prev = 1; // index of switch "jorder-1" in aSwitches
+        int prev = 0; // index of switch "jorder-1" in aSwitches
         while(aSwitches(prev,colTime)<allData(jorder-1,colTime))
             prev = prev + 1;
         
-        aSwitches(prev-1,colTime) = Tnew;
-        aSwitches(prev-1,colX) = Xnew;
-        aSwitches(prev-1,colY) = Ynew;
+        aSwitches(prev,colTime) = Tnew;
+        aSwitches(prev,colX) = Xnew;
+        aSwitches(prev,colY) = Ynew;
     }
     
     return aSwitches;
