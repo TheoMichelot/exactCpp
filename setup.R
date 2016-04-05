@@ -96,7 +96,7 @@ set.seed(1)
 whichActual <- which(obs[-1,colState]!=obs[-nbObs,colState])+1
 nbActual <- length(whichActual)
 
-dt <- 0.1*min(diff(obs[,colTime])) ## ?
+dt <- 0.1*min(diff(obs[,colTime]))
 
 aSwitches <- cbind(X=obs[whichActual,colX],
                    Y=obs[whichActual,colY],
@@ -115,5 +115,5 @@ accloc <- 0
 # Controls
 lenmin <- 3
 lenmax <- 6
-nbIter <- 5000000
+nbIter <- 100000
 thin <- 100

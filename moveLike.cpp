@@ -46,7 +46,6 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
         
         newLikeY(i) = R::dnorm(subData(indObs(i+1),colY),
                  subData(which,colY)+emy, sdy, 1);
-        
     }
     
     // 2. Likelihood with actual switches
@@ -109,6 +108,6 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
     arma::vec newLike = newLikeX + newLikeY;
     arma::vec oldLike = oldLikeX + oldLikeY;
     double HR = exp(sum(newLike)-sum(oldLike));
-
+    
     return HR;
 }

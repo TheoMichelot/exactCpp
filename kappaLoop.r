@@ -1,5 +1,7 @@
 
-for (iii in 1:nbIter)
+t <- Sys.time()
+
+for (iter in 1:nbIter)
 {
     # length of considered interval of observations
     len <- sample(lenmin:lenmax,size=1)
@@ -29,7 +31,7 @@ for (iii in 1:nbIter)
     if(!bk) {
         # compute the likelihood of the trajectory
         HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState)
-
+        
         if(runif(1)<HR) {
             #######################
             ## Accept trajectory ##
@@ -84,7 +86,7 @@ for (iii in 1:nbIter)
         par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
     
     # print parameters to file
-    if(iii%%thin==0)
+    if(iter%%thin==0)
         cat(file=fileparams, round(par,6), "\n", append = TRUE)
     
     # update jump rate k
@@ -104,11 +106,11 @@ for (iii in 1:nbIter)
         aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,lambdapar,kappa,nbState,SDP,map)
     
     # print switching rates to file
-    if(iii%%thin==0)
+    if(iter%%thin==0)
         cat(file=filekappa,lambdapar,"\n", append = TRUE)
     
-    if(iii%%thin==0)
-        cat("\nEnd iteration",iii,"\n")
+    if(iter%%thin==0)
+        cat("End iteration ",iter,", ",Sys.time()-t,"\n",sep="")
     
     rm(allData)
 }

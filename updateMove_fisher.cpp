@@ -6,12 +6,11 @@
 #include <rawMove.cpp>
 #include <findRegion.cpp>
 
-using namespace std;
 using namespace Rcpp;
 
 // [[Rcpp::export]]
 List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma::vec proposalSD,
-                            int nbState, bool mHomog, bool bHomog, bool vHomog)
+                     int nbState, bool mHomog, bool bHomog, bool vHomog)
 {
     arma::vec wpar = n2w(par,nbState);
     // unpack the vector of parameters
@@ -35,7 +34,7 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
     arma::vec mprime = m, bprime = b, vprime = v;
     
     double oldLogPrior = 0, newLogPrior = 0;
-
+    
     // allow for homogeneous and non-homogeneous cases
     if(mHomog) {
         double xmove = R::rnorm(0,mProposalSD(0)); // change in x
@@ -77,7 +76,7 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
             newLogPrior = newLogPrior + R::dnorm(bprime(i),bPriorMean(i),bPriorSD(i),1);
         }
     }
-
+    
     if(vHomog) {
         double vmove = R::rnorm(0,vProposalSD(0));
         for(int i=0 ; i<v.size() ; i++)
@@ -93,7 +92,7 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
             newLogPrior = newLogPrior + R::dnorm(vprime(i),vPriorMean(i),vPriorSD(i),1);
         }
     }
-
+    
     // newPar = w2n(c(mprime,bprime,vprime),nbState)
     arma::vec newPar(m.size()+b.size()+v.size());
     for(int i=0 ; i<2*nbState ; i++)
@@ -102,7 +101,7 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
         newPar(2*nbState+i) = bprime(i);
     for(int i=0 ; i<nbState ; i++)
         newPar(3*nbState+i) = vprime(i);
-        
+    
     newPar = w2n(newPar,nbState);
     
     // list to be returned

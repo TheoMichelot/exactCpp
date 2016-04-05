@@ -1,10 +1,7 @@
 
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
-
 #include <updateMove_fisher.cpp>
-
-using namespace std;
 using namespace Rcpp;
 
 // [[Rcpp::export]]

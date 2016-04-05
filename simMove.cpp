@@ -94,12 +94,13 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
                     }
                 }
             }
-            
+
             // probabilities of actual switch
             // TODO: change for more general code
             arma::vec probs(nbState);
             probs.zeros();
             probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
+            
             probs = probs/kappa;
             
             bool jumpNow = (R::runif(0,1)<sum(probs));
