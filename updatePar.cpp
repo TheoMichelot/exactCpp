@@ -19,7 +19,7 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     
     arma::mat allData2 = allData.rows(arma::span(indMin,allData.n_rows-1));
     int l = allData2.n_rows;
-    
+
     // calculate changes in position and time
     arma::vec preX(l), preY(l), dX(l), dY(l);
     preX(0) = allData(indMin-1,colX);
@@ -42,20 +42,23 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     arma::vec oldMove(l), newMove(l);
     arma::vec oldLogLX(l), oldLogLY(l), newLogLX(l), newLogLY(l);
     
-    for(int i=0 ; i<l ; i++) {
-        int which = i-1; // index of previous switch
-        double deltaT; // interval between switch and obs
-        int state; // state at previous switch
-        
-        if(i>0) {
-            deltaT = allData2(which+1,colTime) - allData2(which,colTime);
-            state = allData2(which,colState);
-        }
-        else {
-            deltaT = allData2(which+1,colTime) - allData(indMin-1,colTime);
-            state = allData(indMin-1,colState);
-        }
-        
+    // initialize
+    double deltaT = allData2(0,colTime) - allData(indMin-1,colTime); // interval between switch and obs
+    int state = allData(indMin-1,colState); // state at previous switch
+    
+    oldMove = rawMove(par,state,deltaT,preX(0),preY(0),nbState);
+    newMove = rawMove(newPar,state,deltaT,preX(0),preY(0),nbState);
+    
+    // oldMove = (emx,emy,sdx,sdy)
+    oldLogLX(0) = R::dnorm(dX(0), oldMove(0), oldMove(2), 1);
+    oldLogLY(0) = R::dnorm(dY(0), oldMove(1), oldMove(3), 1);
+    newLogLX(0) = R::dnorm(dX(0), newMove(0), newMove(2), 1);
+    newLogLY(0) = R::dnorm(dY(0), newMove(1), newMove(3), 1);
+    
+    for(int i=1 ; i<l ; i++) {
+        deltaT = allData2(i,colTime) - allData2(i-1,colTime);
+        state = allData2(i-1,colState);
+
         oldMove = rawMove(par,state,deltaT,preX(i),preY(i),nbState);
         newMove = rawMove(newPar,state,deltaT,preX(i),preY(i),nbState);
         
