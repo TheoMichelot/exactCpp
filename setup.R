@@ -14,7 +14,8 @@ sourceCpp("localUpdate.cpp")
 ## Read data ##
 ###############
 # observations
-obs <- cbind(as.matrix(read.csv("fisherXYT.csv",header=FALSE,skip=3)),NA,NA,NA,NA)
+# obs <- cbind(as.matrix(read.csv("fisherXYT.csv",header=FALSE,skip=3)),NA,NA,NA,NA)
+obs <- cbind(as.matrix(read.csv("~/Grive/software/simulateOU/obs.csv")),NA,NA,NA,NA)
 colnames(obs) <- c("X","Y","Time","State","Habitat","Jump","Behav")
 nbObs <- nrow(obs)
 
@@ -36,17 +37,17 @@ obs[,colBehav] <- 0 # behavioural states not known
 ########################
 ## Initial parameters ##
 ########################
-mpar <- rep(c(9,3.5),nbState) # centers of attraction
+mpar <- rep(c(5,5),nbState) # centers of attraction
 bpar <- rep(1,nbState) # coefficients for matrix B
-vpar <- rep(10,nbState) # coefficients for matrix Lambda
+vpar <- rep(3,nbState) # coefficients for matrix Lambda
 par <- c(mpar,bpar,vpar)
 
 # Priors (on log scale for b, v)
 priorMean <- n2w(par,nbState)
 
 mPriorSD <- rep(c(0.7,0.7),nbState)
-bPriorSD <- rep(2.0,nbState)
-vPriorSD <- rep(2.0,nbState)
+bPriorSD <- rep(1,nbState)
+vPriorSD <- rep(1,nbState)
 priorSD <- c(mPriorSD,bPriorSD,vPriorSD)
 
 # MH proposals (on log scale for b, v)
@@ -55,14 +56,14 @@ bProposalSD <- rep(0.2,nbState)
 vProposalSD <- rep(0.1,nbState)
 proposalSD <- c(mProposalSD,bProposalSD,vProposalSD)
 
-# for "local update"
+# for local update
 SDP <- 0.15
 
 # Initial lambda (non-diagonal elements, filled row-wise)
-lambdapar <- rep(3,6)
+lambdapar <- rep(0.5,6)
 
 # prior beta parameters for lambdas
-shape1 <- 12
+shape1 <- 4
 shape2 <- 4
 kappa <- 4
 
@@ -72,7 +73,7 @@ bHomog <- FALSE
 vHomog <- FALSE
 
 # probability of movement parameter update
-prUpdateMove <- 1
+prUpdateMove <- 0.5
 
 ####################
 ## Prepare output ##
@@ -115,5 +116,5 @@ accloc <- 0
 # Controls
 lenmin <- 3
 lenmax <- 6
-nbIter <- 100000
+nbIter <- 5000000
 thin <- 100
