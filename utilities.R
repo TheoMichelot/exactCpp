@@ -63,7 +63,7 @@ w2n <- function(wpar,nbState)
 #' @param shape1 Non-negative parameter
 #' @param shape2 Non-negative parameter
 #' @param low Lower limit of the truncated distribution
-rtruncbeta <- function(n=1,shape1=1,shape2=1,low=0.5)
+rtruncbeta <- function(n=1,shape1=1,shape2=1,low=0)
 {
     p.min <- pbeta(low,shape1,shape2)
     p <- p.min+runif(n)*(1-p.min)
