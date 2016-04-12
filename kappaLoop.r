@@ -11,9 +11,9 @@ for (iter in 1:nbIter)
     point2 <- point1+len-1
     
     # selected observations
-    subObs <- obs[point1:point2,] 
+    subObs <- obs[point1:point2,]
     
-    # times and states of beginning and end
+    # times of beginning and end
     Tbeg <- subObs[1,colTime]
     Tend <- subObs[len,colTime]
     
@@ -93,6 +93,10 @@ for (iter in 1:nbIter)
     if(!bk & nbActual>0)
         lambdapar <- updateRate(allData, indSwitchAll, kappa, shape1, shape2)
     
+    # print switching rates to file
+    if(iter%%thin==0)
+        cat(file=filekappa,lambdapar,"\n", append = TRUE)
+    
     bk <- FALSE
     
     #########################
@@ -104,10 +108,6 @@ for (iter in 1:nbIter)
     
     if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
         aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,lambdapar,kappa,nbState,SDP,map)
-    
-    # print switching rates to file
-    if(iter%%thin==0)
-        cat(file=filekappa,lambdapar,"\n", append = TRUE)
     
     if(iter%%thin==0)
         cat("End iteration ",iter,", ",Sys.time()-t,"\n",sep="")
