@@ -7,11 +7,12 @@ using namespace Rcpp;
 //' Returns mean and standard deviation of the animal's next locations, from the movement
 //' parameters and the previous location.
 //' 
-//' @param PAR1 PAR2 PAR3 Movement parameters
+//' @param par Movement parameters
 //' @param state State of underlying process
 //' @param deltaT Time interval between current and next location
-//' @param xx X-coordinate of current location
-//' @param yy Y-coordinate of current location
+//' @param x X-coordinate of current location
+//' @param y Y-coordinate of current location
+//' @param nbState Number of states
 //' 
 //' @details Assume for now exactly 3 parameter objects!
 arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, int nbState)
