@@ -26,18 +26,22 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     //=============================//
     // number of potential switches
     int nbSwitch = R::rpois((Tend-Tbeg)*kappa);
-    if(nbSwitch==0)
-        nbSwitch = 1; // code cannot deal with nbSwitch==0; to be fixed?
     
-    // initialize potential switches
-    arma::mat switches = arma::mat(nbSwitch,7).fill(NA_REAL);
-    for(int i=0 ; i<nbSwitch ; i++) {
-        switches(i,colTime) = R::runif(Tbeg,Tend); // Poisson process -> uniformly distributed
-        switches(i,colBehav) = 0;
+    arma::mat switches;
+    arma::mat subData;
+    if(nbSwitch>0) {
+        // initialize potential switches
+        switches = arma::mat(nbSwitch,7).fill(NA_REAL);
+        for(int i=0 ; i<nbSwitch ; i++) {
+            switches(i,colTime) = R::runif(Tbeg,Tend); // Poisson process -> uniformly distributed
+            switches(i,colBehav) = 0;
+        }
+        
+        // simulated switches are on top, observations at the bottom
+        subData = join_cols(switches,subObs); // equivalent to rbind()
     }
-    
-    // simulated switches are on top, observations at the bottom
-    arma::mat subData = join_cols(switches,subObs); // equivalent to rbind()
+    else
+        subData = subObs; // if nbSwitch=0
     
     // ranks of data by time
     arma::uvec ranks = myrank(subData.col(colTime));
