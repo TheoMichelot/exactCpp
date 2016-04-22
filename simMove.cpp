@@ -46,11 +46,14 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
     // ranks of data by time
     arma::uvec ranks = myrank(subData.col(colTime));
     
+    arma::uvec indSwitch;
     // indices of potential switches among observations
-    arma::uvec indSwitch = ranks(arma::span(0,nbSwitch-1));
+    if(nbSwitch>0)
+         indSwitch = ranks(arma::span(0,nbSwitch-1));
+
     // indices of observations among potential switches
     arma::uvec indObs = ranks(arma::span(nbSwitch,nbSwitch+len-1));
-
+    
     // order data in time
     arma::mat subDataCopy = subData;
     arma::uvec orders = sort_index(subData.col(colTime));
