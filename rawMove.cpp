@@ -4,8 +4,8 @@ using namespace Rcpp;
 
 //' Raw movement
 //' 
-//' Returns mean and standard deviation of the animal's next locations, from the movement
-//' parameters and the previous location.
+//' Returns mean change in location, and standard deviation of the animal's next locations, 
+//' from the movement parameters and the previous location.
 //' 
 //' @param par Movement parameters
 //' @param state State of underlying process
@@ -13,8 +13,6 @@ using namespace Rcpp;
 //' @param x X-coordinate of current location
 //' @param y Y-coordinate of current location
 //' @param nbState Number of states
-//' 
-//' @details Assume for now exactly 3 parameter objects!
 arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, int nbState)
 {
     // unpack the vector of parameters
@@ -30,8 +28,8 @@ arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, i
     double sd = sqrt(v*(1-phi*phi));
 
     arma::vec res(4);
-    res(0) = (1-phi)*(mux-x); // x mean
-    res(1) = (1-phi)*(muy-y); // y mean
+    res(0) = (1-phi)*(mux-x); // x mean (new mean - old location)
+    res(1) = (1-phi)*(muy-y); // y mean (new mean - old location)
     res(2) = sd; // x sd
     res(3) = sd; // y sd
 
