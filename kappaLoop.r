@@ -1,5 +1,9 @@
 
 t <- Sys.time()
+accTraj <- 0
+accTrajAll <- rep(NA,nbIter/thin)
+accPar <- 0
+accParAll <- rep(NA,nbIter/thin)
 
 for (iter in 1:nbIter)
 {
@@ -20,23 +24,26 @@ for (iter in 1:nbIter)
     ####################################
     ## Simulate movement and switches ##
     ####################################
-    sim <- simMove_rcpp(subObs,par,kappa,lambdapar,nbState,map)
+    sim <- simMove_rcpp(subObs,par,kappa,lambdapar,nbState,map,adaptative)
     subData <- sim[[1]]
     indObs <- sim[[2]]
     indObs <- indObs[order(indObs)]
     indSwitch <- sim[[3]]
     indSwitch <- indSwitch[order(indSwitch)]
     bk <- sim[[4]]
+        
     
     if(!bk) {
         # compute the likelihood of the trajectory
         HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState)
         
         if(runif(1)<HR) {
+            
+            accTraj <- accTraj + 1
+            
             #######################
             ## Accept trajectory ##
             #######################
-            
             # Update proposals - states etc have changed
             switches <- subData[c(0,indSwitch),,drop=FALSE]
             
@@ -62,7 +69,8 @@ for (iter in 1:nbIter)
         }
     }
     
-    nbActual <- nrow(aSwitches) # this nbActual has been updated to match new aSwitches
+    # update nbActual for new aSwitches
+    nbActual <- nrow(aSwitches)
     
     ################################
     ## Update movement parameters ##
@@ -81,17 +89,26 @@ for (iter in 1:nbIter)
     ord <- order(allData[,colTime])
     allData <- allData[ord,]
     
+    parCopy <- par
+    
     # parameter update
     if(runif(1)<prUpdateMove)
         par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
-    
+
+    if(!all(par==parCopy))
+        accPar <- accPar + 1
+        
     # print parameters to file
     if(iter%%thin==0)
         cat(file=fileparams, round(par,6), "\n", append = TRUE)
     
     # update jump rate k
-    if(!bk & nbActual>0)
-        lambdapar <- updateRate(allData, indSwitchAll, kappa, shape1, shape2)
+    if(!bk & nbActual>0) {
+        if(adaptative)
+            lambdapar <- updateRate(allData, indSwitchAll, kappa, shape1, shape2, nbState)
+        else
+            lambdapar <- updateRate_unconstr(allData, indSwitchAll, kappa, shape1, shape2, nbState)
+    }
     
     # print switching rates to file
     if(iter%%thin==0)
@@ -107,10 +124,13 @@ for (iter in 1:nbIter)
     jorder <- indObsAll[j]
     
     if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
-        aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,lambdapar,kappa,nbState,SDP,map)
+        aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,lambdapar,kappa,nbState,SDP,map,adaptative)
     
-    if(iter%%thin==0)
+    if(iter%%thin==0) {
         cat("End iteration ",iter,", ",Sys.time()-t,"\n",sep="")
+        accTrajAll[iter/thin] <- accTraj/iter*100
+        accParAll[iter/thin] <- accPar/iter*100
+    }
     
     rm(allData)
 }

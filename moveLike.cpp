@@ -66,7 +66,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
             count = count+1;
         }
     }
-    
+
     // actual switches and observations between Tbeg and Tend
     arma::mat aSubData = join_cols(aSwitches.rows(whichActual),subObs);
     
@@ -83,7 +83,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
     arma::uvec orders = sort_index(aSubData.col(colTime));
     for(int i=0 ; i<nbActual+len ; i++)
         aSubData.row(i) = aSubDataCopy.row(orders(i));
-    
+
     arma::vec oldLikeX(len-1), oldLikeY(len-1);
 
     for(int i=0 ; i<len-1 ; i++) {
