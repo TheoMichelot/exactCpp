@@ -9,7 +9,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, arma::vec par, arma::vec lambdapar,
-                           double kappa, int nbState, double SDP, arma::mat map)
+                           double kappa, int nbState, double SDP, arma::mat map, bool adaptative)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -48,30 +48,40 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     int Hnew = findRegion(Xnew,Ynew,map);
     
     // effect of habitat
-//     // matrix of switching rates
-//     arma::mat A(nbState,nbState);
-//     int k = 0;
-//     for(int i=0 ; i<nbState ; i++) {
-//         for(int j=0 ; j<nbState ; j++) {
-//             if(i==j)
-//                 A(i,j) = 0; // diagonal is zero
-//             else {
-//                 A(i,j) = lambdapar(k); // switching rate i -> j
-//                 k = k+1;
-//             }
-//         }
-//     }
-//     
-//     // probabilities of actual switch
-//     // TODO: change for more general code
-//     arma::vec rate1(nbState);
-//     rate1.zeros();
-//     rate1(H1-1) = A(S2-1,H1-1);
-//     arma::vec rateNew(nbState);
-//     rateNew.zeros();
-//     rateNew(Hnew-1) = A(S2-1,Hnew-1);
-//     double newHfactor = rateNew(S1-1)/rate1(S1-1);
+    // matrix of switching rates
+    arma::mat A(nbState,nbState);
+    int k = 0;
+    for(int i=0 ; i<nbState ; i++) {
+        for(int j=0 ; j<nbState ; j++) {
+            if(i==j)
+                A(i,j) = 0; // diagonal is zero
+            else {
+                A(i,j) = lambdapar(k); // switching rate i -> j
+                k = k+1;
+            }
+        }
+    }
+    
+    // probabilities of actual switch
+    arma::vec rate1(nbState);
+    arma::vec rateNew(nbState);
     double newHfactor = 1;
+    
+    if(adaptative) {
+        rate1.zeros();
+        rate1(H1-1) = A(S2-1,H1-1);
+        rate1(S2-1) = kappa - rate1(H1-1);
+        
+        rateNew.zeros();
+        rateNew(Hnew-1) = A(S2-1,Hnew-1);
+        rateNew(S2-1) = kappa - rateNew(Hnew-1);
+        
+        newHfactor = rateNew(S1-1)/rate1(S1-1);
+    }
+    // else newHfactor is always 1, right?
+    
+//     Rcout << "S1 = " << S1 << "; S2 = " << S2 << "; H1 = " << H1 << "; Hnew = " << Hnew << std::endl;
+//     Rcout << arma::conv_to< arma::rowvec >::from(rateNew) << arma::conv_to< arma::rowvec >::from(rate1) << std::endl;
     
     // new log-likelihood
     arma::vec newMove2 = rawMove(par,S2,Tnew-T2,X2,Y2,nbState);
