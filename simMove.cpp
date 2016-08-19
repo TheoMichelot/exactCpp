@@ -11,7 +11,8 @@
 using namespace Rcpp;
 
 // [[Rcpp::export]]
-List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambdapar, int nbState, arma::mat map)
+List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambdapar, int nbState, arma::mat map,
+                  bool adaptative)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -53,7 +54,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
 
     // indices of observations among potential switches
     arma::uvec indObs = ranks(arma::span(nbSwitch,nbSwitch+len-1));
-    
+
     // order data in time
     arma::mat subDataCopy = subData;
     arma::uvec orders = sort_index(subData.col(colTime));
@@ -101,12 +102,15 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
                     }
                 }
             }
-
+            
             // probabilities of actual switch
-            // TODO: change for more general code
-            arma::vec probs(nbState);
-            probs.zeros();
-            probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
+            arma::rowvec probs(nbState);
+            if(adaptative) {
+                probs.zeros();
+                probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
+            } 
+            else
+                probs = A.row(subData(t-1,colState)-1);
             
             probs = probs/kappa;
             
@@ -114,7 +118,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             
             if(jumpNow) {
                 // if jump, pick new state
-                subData(t,colState) = mysample(probs);
+                subData(t,colState) = mysample(arma::conv_to< arma::vec >::from(probs));
                 subData(t,colJump) = 1;
             }
             else {
