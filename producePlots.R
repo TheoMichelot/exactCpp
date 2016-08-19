@@ -1,34 +1,76 @@
 
-# estim <- read.table("params2016-04-07-1121.txt",header=TRUE)
+library(scales) # for nice colors
+par(mfrow=c(1,1))
 
-logb1 <- log(estim[20000:50000,7])
-logb2 <- log(estim[20000:50000,8])
-logb3 <- log(estim[20000:50000,9])
-logv1 <- log(estim[20000:50000,10])
-logv2 <- log(estim[20000:50000,11])
-logv3 <- log(estim[20000:50000,12])
+# movement parameters
+par <- c(8,5,8,5,8,5, # mu
+         -0.5,-0.3,-0.1, # b
+         2,3,5) # v
 
-bmax <- max(c(logb1,logb2,logb3))
-bmin <- min(c(logb1,logb2,logb3))
-vmax <- max(c(logv1,logv2,logv3))
-vmin <- min(c(logv1,logv2,logv3))
+lambdapar <- rep(0.5,6)
 
-plot(logb1,logv1,pch=19,cex=0.2,col=rgb(1,0,0,alpha=0.3),xlim=c(bmin,bmax),ylim=c(vmin,vmax),
-     xlab="log(b)",ylab="log(v)")
-points(logb2,logv2,pch=19,cex=0.2,col=rgb(0,1,0,alpha=0.3))
-points(logb3,logv3,pch=19,cex=0.2,col=rgb(0,0,1,alpha=0.3))
+estim <- read.table(fileparams,header=TRUE)
+start <- nrow(estim)/2
+end <- nrow(estim)
 
-# values of parameters used in simulation
-points(log(1.5),log(5),pch=19)
-points(log(0.8),log(3),pch=19)
-points(log(0.2),log(1),pch=19)
+# plot bounds for mu
+muxmax <- max(estim[(start:end),(2*(1:nbState)-1)])
+muxmin <- min(estim[(start:end),(2*(1:nbState)-1)])
+muymax <- max(estim[(start:end),(2*(1:nbState))])
+muymin <- min(estim[(start:end),(2*(1:nbState))])
 
-plot(estim[20000:50000,1],estim[20000:50000,2],pch=19,cex=0.3,col=rgb(0,0,0,alpha=0.5),
-     xlab="mu_x",ylab="mu_y")
+# plot bounds for b vs v
+bmax <- max(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
+bmin <- min(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
+vmax <- max(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
+vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
 
-points(6,6,pch=19,col="firebrick3")
+bmax <- log(0.5)
+vmin <- log(2)
 
-# rates <- read.table("rates2016-04-07-1551.txt",header=TRUE)
-par(mfrow=c(3,2))
-for(i in 1:6)
-    plot(rates[20000:50000,i],type="l")
+# plot mu
+plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(2,0.3),
+     xlab="mu_x",ylab="mu_y",xlim=c(muxmin,muxmax),ylim=c(muymin,muymax))
+points(par[1],par[2],pch=19)
+
+if(nbState>1) {
+    for(i in 2:nbState) {
+        points(estim[start:end,2*i-1],estim[start:end,2*i],pch=19,cex=0.2,col=alpha(i+1,0.3))
+        points(par[2*i-1],par[2*i],pch=19)
+    }
+}
+
+# plot b vs v
+plot(log(estim[start:end,2*nbState+1]),log(estim[start:end,3*nbState+1]),pch=19,cex=0.2,
+     col=alpha(2,0.3),xlim=c(bmin,bmax),ylim=c(vmin,vmax),xlab="log(b)",ylab="log(v)")
+points(log(-par[2*nbState+1]),log(par[3*nbState+1]),pch=19)
+
+if(nbState>1) {
+    for(i in 2:nbState) {
+        points(log(estim[start:end,2*nbState+i]),log(estim[start:end,3*nbState+i]),pch=19,cex=0.2,
+               col=alpha(i+1,0.3))
+        points(log(-par[2*nbState+i]),log(par[3*nbState+i]),pch=19)
+    }
+}
+
+
+# plot(log(estim[start:end,3]),log(estim[start:end,6]),pch=19,cex=0.2,
+#      col=alpha(2,0.3),xlim=c(bmin,bmax),ylim=c(vmin,vmax),xlab="log(b)",ylab="log(v)")
+# points(log(0.1),log(0.05),pch=19)
+# 
+# points(log(estim[start:end,4]),log(estim[start:end,7]),pch=19,cex=0.2,
+#        col=alpha(3,0.3))
+# points(log(0.1),log(0.5),pch=19)
+# 
+# points(log(estim[start:end,5]),log(estim[start:end,8]),pch=19,cex=0.2,
+#        col=alpha(4,0.3))
+# points(log(0.1),log(5),pch=19)
+
+
+if(nbState>1) {
+    rates <- read.table(filekappa,header=TRUE)
+    par(mfrow=c(nbState,nbState-1))
+    for(i in 1:(nbState*(nbState-1)))
+        plot(rates[start:end,i],type="l",main=paste("True value:",lambdapar[i]))
+    par(mfrow=c(1,1))
+}
