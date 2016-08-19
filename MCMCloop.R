@@ -4,19 +4,6 @@
 #' @param allArgs List of all arguments: [add itemized list here]
 MCMCloop <- function(allArgs)
 {
-    t <- Sys.time()
-    accTraj <- 0
-    accTrajAll <- rep(NA,nbIter/thin)
-    accPar <- 0
-    accParAll <- rep(NA,nbIter/thin)
-    
-    # enable references by "name" 
-    colX <- 1; colY <- 2; colTime <- 3; colState <- 4; colHabitat <- 5; colJump <- 6; colBehav <- 7
-    
-    # initialise movement parameters and rates
-    par <- allArgs$par0
-    rates <- allArgs$rates0
-    
     # unpack arguments
     nbState <- allArgs$nbState
     map <- allArgs$map
@@ -26,7 +13,7 @@ MCMCloop <- function(allArgs)
     obs <- allArgs$obs
     priorMean <- allArgs$priorMean
     priorSD <- allArgs$priorSD
-    proposalSD <- proposalSD
+    proposalSD <- allArgs$proposalSD
     controls <- allArgs$controls
     nbIter <- allArgs$nbIter
     map <- allArgs$map
@@ -37,11 +24,24 @@ MCMCloop <- function(allArgs)
     nbActual <- allArgs$nbActual
     whichActual <- allArgs$whichActual
     adapt <- allArgs$adapt
+    
+    t <- Sys.time()
+    accTraj <- 0
+    accTrajAll <- rep(NA,nbIter/controls$thin)
+    accPar <- 0
+    accParAll <- rep(NA,nbIter/controls$thin)
+    
+    # enable references by "name" 
+    colX <- 1; colY <- 2; colTime <- 3; colState <- 4; colHabitat <- 5; colJump <- 6; colBehav <- 7
+    
+    # initialise movement parameters and rates
+    par <- allArgs$par0
+    rates <- allArgs$rates0
  
     bk <- FALSE
        
     # MCMC loop
-    for(iter in 1:allArgs$nbIter) {
+    for(iter in 1:nbIter) {
         # length of considered interval of observations
         len <- sample(controls$lenmin:controls$lenmax,size=1)
         
@@ -59,7 +59,7 @@ MCMCloop <- function(allArgs)
         ####################################
         ## Simulate movement and switches ##
         ####################################
-        sim <- simMove_rcpp(subObs,par,allArgs$kappa,rates,nbState,map,adapt)
+        sim <- simMove_rcpp(subObs,par,controls$kappa,rates,nbState,map,adapt)
         subData <- sim[[1]]
         indObs <- sim[[2]]
         indObs <- indObs[order(indObs)]
@@ -127,26 +127,27 @@ MCMCloop <- function(allArgs)
         parCopy <- par
         
         # parameter update
-        if(runif(1)<prUpdateMove)
-            par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,obs)
+        if(runif(1)<controls$prUpdateMove)
+            par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,
+                                  homog$mHomog,homog$bHomog,homog$vHomog,obs)
         
         if(!all(par==parCopy))
             accPar <- accPar + 1
         
         # print parameters to file
-        if(iter%%thin==0)
+        if(iter%%controls$thin==0)
             cat(file=fileparams, round(par,6), "\n", append = TRUE)
         
         # update jump rate k
         if(!bk & nbActual>0) {
             if(adapt)
-                rates <- updateRate(allData, indSwitchAll, kappa, shape1, shape2, nbState)
+                rates <- updateRate(allData, indSwitchAll, controls$kappa, shape1, shape2, nbState)
             else
-                rates <- updateRate_unconstr(allData, indSwitchAll, kappa, shape1, shape2, nbState)
+                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, shape1, shape2, nbState)
         }
         
         # print switching rates to file
-        if(iter%%thin==0)
+        if(iter%%controls$thin==0)
             cat(file=filerates,rates,"\n", append = TRUE)
         
         bk <- FALSE
@@ -159,17 +160,19 @@ MCMCloop <- function(allArgs)
         jorder <- indObsAll[j]
         
         if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
-            aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,rates,kappa,nbState,SDP,map,adapt)
+            aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,rates,controls$kappa,nbState,SDP,map,adapt)
         
-        if(iter%%thin==0) {
+        if(iter%%controls$thin==0) {
             cat("End iteration ",iter,"/",nbIter," -- ",Sys.time()-t,"\n",sep="")
-            accTrajAll[iter/thin] <- accTraj/iter*100
-            accParAll[iter/thin] <- accPar/iter*100
+            accTrajAll[iter/controls$thin] <- accTraj/iter*100
+            accParAll[iter/controls$thin] <- accPar/iter*100
         }
         
         rm(allData)
     }
     
-    return(list(accTrajAll=accTrajAll,
+    return(list(fileparams=fileparams,
+                filerates=filerates,
+                accTrajAll=accTrajAll,
                 accParAll=accParAll))
 }

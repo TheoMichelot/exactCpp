@@ -3,18 +3,18 @@
 #' Setup data and parameters for MCMC algorithm
 #' 
 #' @param obs Matrix or data frame of observations, with columns x, y, and time.
-#' @param par0 List of initial values for the movement parameters. Must have three elements: mu, b, and v,
+#' @param par0 List of initial values for the movement parameters. Must have three elements: m, b, and v,
 #' each of length the number of states.
 #' @param rates0 Vector of initial values for the switching rates. Must be of length 
 #' number of states * (number of states - 1).
 #' @param homog List of mHomog, bHomog, and vHomog, which each indicate whether the corresponding movement
 #' parameter is homogeneous across states (TRUE) or not (FALSE -- default).
-#' @param priorMean List of means of priors for the movement parameters. Must have three elements: mu, b, and v,
+#' @param priorMean List of means of priors for the movement parameters. Must have three elements: m, b, and v,
 #' each of length the number of states.
 #' @param priorSD List of standard deviations of priors for the movement parameters. Must have three elements: 
-#' mu, b, and v, each of length the number of states.
+#' m, b, and v, each of length the number of states.
 #' @param proposalSD List of standard deviations of proposals for the movement parameters. Must have three elements: 
-#' mu, b, and v, each of length the number of states.
+#' m, b, and v, each of length the number of states.
 #' @param nbIter Number of iterations of the MCMC algorithm.
 #' @param map Map of habitats, if adaptative model.
 #' @param nbState Number of states.
@@ -28,6 +28,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
                       priorMean=NULL, priorSD=NULL, proposalSD=NULL, nbIter=5e5, map=NULL, nbState=NULL, 
                       controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1))
 {
+    par <- c(par0$m,par0$b,par0$v)
     
     # Are we working with the adaptative model?
     if(is.null(map)) {
@@ -36,7 +37,8 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         adapt <- FALSE
         
         map <- matrix(1,nrow=1,ncol=1)
-    }
+    } else
+        adapt <- TRUE
 
     ###############
     ## Read data ##
@@ -66,7 +68,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     if(is.null(priorMean))
         priorMean <- n2w(par,nbState)
     else
-        priorMean <- n2w(c(priorMean$mu,priorMean$b,priorMean$v),nbState)
+        priorMean <- n2w(c(priorMean$m,priorMean$b,priorMean$v),nbState)
     
     if(is.null(priorSD)) {
         mPriorSD <- rep(c(10,10),nbState)
@@ -74,7 +76,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         vPriorSD <- rep(10,nbState)
         priorSD <- c(mPriorSD,bPriorSD,vPriorSD) 
     } else
-        priorSD <- c(priorSD$mu,priorSD$b,priorSD$v) 
+        priorSD <- c(priorSD$m,priorSD$b,priorSD$v) 
 
     # MH proposals (on log scale for b and v)
     if(is.null(proposalSD)) {
@@ -83,7 +85,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         vProposalSD <- rep(0.03,nbState)
         proposalSD <- c(mProposalSD,bProposalSD,vProposalSD)
     } else
-        proposalSD <- c(proposalSD$mu,proposalSD$b,proposalSD$v)
+        proposalSD <- c(proposalSD$m,proposalSD$b,proposalSD$v)
     
     # for local update
     SDP <- 0.15
@@ -139,9 +141,11 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
                        Behav=rep(0,nbActual))
     
     # Controls
+    if(is.null(controls$kappa))
+        controls$kappa <- 3
     if(is.null(controls$lenmin))
         controls$lenmin <- 3
-    if(is.null(controls$lenmqx))
+    if(is.null(controls$lenmax))
         controls$lenmax <- 6
     if(is.null(controls$thin))
         controls$thin <- 100
@@ -149,7 +153,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         controls$prUpdateMove <- 1
     
     return(list(obs=obs,
-                par0=c(par0$mu,par0$b,par0$v),
+                par0=par,
                 rates0=rates0,
                 nbState=nbState,
                 priorMean=priorMean,
