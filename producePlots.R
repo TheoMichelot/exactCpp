@@ -3,9 +3,9 @@ library(scales) # for nice colors
 par(mfrow=c(1,1))
 
 # movement parameters
-par <- c(4,6,8,6, # mu
-         -2,-0.3, # b
-         1,2) # v
+par <- c(3,6,9,6, # mu
+         -2,-2, # b
+         2,2) # v
 
 lambdapar <- rep(0.5,2)
 
@@ -24,9 +24,6 @@ bmax <- max(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
 bmin <- min(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
 vmax <- max(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
 vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
-
-bmax <- log(0.5)
-vmin <- log(2)
 
 # plot mu
 plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(2,0.3),
