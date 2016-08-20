@@ -107,6 +107,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
     // 3. Deduce the Hastings ratio
     arma::vec newLike = newLikeX + newLikeY;
     arma::vec oldLike = oldLikeX + oldLikeY;
+    
     double HR = exp(sum(newLike)-sum(oldLike));
     
     return HR;
