@@ -14,16 +14,16 @@ sourceCpp("updatePar.cpp")
 sourceCpp("localUpdate.cpp")
 
 # Are we working with the adaptative model?
-adaptative <- FALSE
+adaptative <- TRUE
 
 ###############
 ## Read data ##
 ###############
 # observations
 # obs <- cbind(as.matrix(read.csv("fisherXYT.csv",header=FALSE,skip=3)),NA,NA,NA,NA)
-# obs <- cbind(as.matrix(read.csv("~/Grive/software/simulateOU/obs.csv")),NA,NA,NA,NA)
+obs <- cbind(as.matrix(read.csv("~/Grive/software/simulation/obs.csv")),NA,NA,NA,NA)
 
-obs <- cbind(as.matrix(read.table("~/Grive/data/simdata_myopic_review.txt",header=TRUE)),NA,NA,NA,NA)
+# obs <- cbind(as.matrix(read.table("~/Grive/data/simdata_myopic_review.txt",header=TRUE)),NA,NA,NA,NA)
 colnames(obs) <- c("X","Y","Time","State","Habitat","Jump","Behav")
 nbObs <- nrow(obs)
 
@@ -34,11 +34,11 @@ colX <- 1; colY <- 2; colTime <- 3; colState <- 4; colHabitat <- 5; colJump <- 6
 # map <- as.matrix(read.csv("habitat.csv",header=FALSE,skip=3))
 
 # 1-state model map
-map <- matrix(1,nrow=1,ncol=1)
+# map <- matrix(1,nrow=1,ncol=1)
 
 # 2-state model map
-# map <- matrix(1,nrow=12,ncol=12)
-# map[7:12,] <- 2
+map <- matrix(1,nrow=12,ncol=12)
+map[7:12,] <- 2
 
 nbHabitat <- length(unique(c(map))) # count habitat types
 if(adaptative) {
@@ -87,7 +87,7 @@ shape2 <- 4
 kappa <- 2
 
 # homogeneity between states
-mHomog <- TRUE
+mHomog <- FALSE
 bHomog <- FALSE
 vHomog <- FALSE
 
@@ -130,5 +130,5 @@ bk <- FALSE
 # Controls
 lenmin <- 3
 lenmax <- 6
-nbIter <- 5e5
+nbIter <- 10000
 thin <- 100

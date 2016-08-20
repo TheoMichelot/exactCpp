@@ -3,13 +3,13 @@ library(scales) # for nice colors
 par(mfrow=c(1,1))
 
 # movement parameters
-par <- c(8,5,8,5,8,5, # mu
-         -0.5,-0.3,-0.1, # b
-         2,3,5) # v
+par <- c(4,6,8,6, # mu
+         -2,-0.3, # b
+         1,2) # v
 
-lambdapar <- rep(0.5,6)
+lambdapar <- rep(0.5,2)
 
-estim <- read.table(fileparams,header=TRUE)
+estim <- read.table(mod$fileparams,header=TRUE)
 start <- nrow(estim)/2
 end <- nrow(estim)
 
@@ -53,20 +53,7 @@ if(nbState>1) {
     }
 }
 
-
-# plot(log(estim[start:end,3]),log(estim[start:end,6]),pch=19,cex=0.2,
-#      col=alpha(2,0.3),xlim=c(bmin,bmax),ylim=c(vmin,vmax),xlab="log(b)",ylab="log(v)")
-# points(log(0.1),log(0.05),pch=19)
-# 
-# points(log(estim[start:end,4]),log(estim[start:end,7]),pch=19,cex=0.2,
-#        col=alpha(3,0.3))
-# points(log(0.1),log(0.5),pch=19)
-# 
-# points(log(estim[start:end,5]),log(estim[start:end,8]),pch=19,cex=0.2,
-#        col=alpha(4,0.3))
-# points(log(0.1),log(5),pch=19)
-
-
+# trace plots of rates
 if(nbState>1) {
     rates <- read.table(filekappa,header=TRUE)
     par(mfrow=c(nbState,nbState-1))
