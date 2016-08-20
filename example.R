@@ -4,6 +4,7 @@ source("minitabGeneric.r")
 source("updateRate_fisher.R")
 source("updateRate_unconstr.R")
 source("utilities.R")
+source("allPlots.R")
 
 library(Rcpp)
 library(RcppArmadillo)
@@ -35,11 +36,6 @@ homog=list(mHomog=FALSE, bHomog=TRUE, vHomog=TRUE)
 set.seed(1)
 allArgs <- setupMCMC(obs, par0, rates0, map=map, homog=homog)
 mod <- MCMCloop(allArgs)
-
-estim <- read.table(mod$fileparams,header=TRUE)
-# print(estim)
-
-source("allPlots.R")
 
 allPlots(nbState=2, fileparams=mod$fileparams, filerates=mod$filerates, 
          truePar=c(3,6,9,6, # mu

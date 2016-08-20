@@ -19,9 +19,6 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     vmax <- max(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
     vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
     
-    bmax <- log(0.5)
-    vmin <- log(2)
-    
     # plot mu
     plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(2,0.3),
          xlab="mu_x",ylab="mu_y",xlim=c(muxmin,muxmax),ylim=c(muymin,muymax))
@@ -57,7 +54,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     
     # trace plots of rates
     if(nbState>1) {
-        rates <- read.table(filekappa,header=TRUE)
+        rates <- read.table(filerates,header=TRUE)
         par(mfrow=c(nbState,nbState-1))
         for(i in 1:(nbState*(nbState-1)))
             plot(rates[start:end,i],type="l")
