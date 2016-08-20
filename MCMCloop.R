@@ -14,6 +14,7 @@ MCMCloop <- function(allArgs)
     priorMean <- allArgs$priorMean
     priorSD <- allArgs$priorSD
     proposalSD <- allArgs$proposalSD
+    shape <- allArgs$shape
     controls <- allArgs$controls
     nbIter <- allArgs$nbIter
     map <- allArgs$map
@@ -141,9 +142,9 @@ MCMCloop <- function(allArgs)
         # update jump rate k
         if(!bk & nbActual>0) {
             if(adapt)
-                rates <- updateRate(allData, indSwitchAll, controls$kappa, shape1, shape2, nbState)
+                rates <- updateRate(allData, indSwitchAll, controls$kappa, shape[1], shape[2], nbState)
             else
-                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, shape1, shape2, nbState)
+                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, shape[1], shape[2], nbState)
         }
         
         # print switching rates to file
@@ -160,7 +161,8 @@ MCMCloop <- function(allArgs)
         jorder <- indObsAll[j]
         
         if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
-            aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,rates,controls$kappa,nbState,SDP,map,adapt)
+            aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,rates,controls$kappa,nbState,
+                                          controls$SDP,map,adapt)
         
         if(iter%%controls$thin==0) {
             cat("End iteration ",iter,"/",nbIter," -- ",Sys.time()-t,"\n",sep="")

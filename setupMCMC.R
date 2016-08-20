@@ -15,6 +15,7 @@
 #' m, b, and v, each of length the number of states.
 #' @param proposalSD List of standard deviations of proposals for the movement parameters. Must have three elements: 
 #' m, b, and v, each of length the number of states.
+#' @param shape Prior shapes for beta distribution of switching rates.
 #' @param nbIter Number of iterations of the MCMC algorithm.
 #' @param map Map of habitats, if adaptative model.
 #' @param nbState Number of states.
@@ -25,8 +26,9 @@
 #' \item{thin}{Thinning factor;}
 #' \item{prUpdateMove}{Probability of updating movement parameters at each iteration.}
 setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
-                      priorMean=NULL, priorSD=NULL, proposalSD=NULL, nbIter=5e5, map=NULL, nbState=NULL, 
-                      controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1))
+                      priorMean=NULL, priorSD=NULL, proposalSD=NULL, shape=c(4,4), nbIter=5e5, 
+                      map=NULL, nbState=NULL, 
+                      controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15))
 {
     par <- c(par0$m,par0$b,par0$v)
     
@@ -87,16 +89,9 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     } else
         proposalSD <- c(proposalSD$m,proposalSD$b,proposalSD$v)
     
-    # for local update
-    SDP <- 0.15
-    
     # Initial lambda (non-diagonal elements, filled row-wise)
     if(is.null(rates0))
         rates0 <- rep(1,nbState*(nbState-1))
-    
-    # prior beta parameters for lambdas
-    shape1 <- 4
-    shape2 <- 4
 
     ####################
     ## Prepare output ##
@@ -141,6 +136,8 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
                        Behav=rep(0,nbActual))
     
     # Controls
+    if(is.null(controls))
+        controls <- list()
     if(is.null(controls$kappa))
         controls$kappa <- 3
     if(is.null(controls$lenmin))
@@ -151,6 +148,8 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         controls$thin <- 100
     if(is.null(controls$prUpdateMove))
         controls$prUpdateMove <- 1
+    if(is.null(controls$SDP))
+        controls$SDP <- 0.15
     
     return(list(obs=obs,
                 par0=par,
@@ -159,6 +158,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
                 priorMean=priorMean,
                 priorSD=priorSD,
                 proposalSD=proposalSD,
+                shape=shape,
                 controls=controls,
                 nbIter=nbIter,
                 map=map,
