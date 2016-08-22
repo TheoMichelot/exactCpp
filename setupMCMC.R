@@ -1,5 +1,4 @@
 
-
 #' Setup data and parameters for MCMC algorithm
 #' 
 #' @param obs Matrix or data frame of observations, with columns x, y, and time.
@@ -99,6 +98,9 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     d <- format(Sys.time(), "%Y-%m-%d-%H%M")
     
     fileparams <- paste("params", d, ".txt", sep = "")
+    
+    # initialize file (to make sure it's empty)
+    cat(file=fileparams, "", sep="")
     # Header
     for(state in 1:nbState)
         cat(file=fileparams, "mux", state, " muy", state, " ", append=TRUE, sep = "")
