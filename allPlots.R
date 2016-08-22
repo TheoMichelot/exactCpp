@@ -4,7 +4,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     library(scales)
     
     estim <- read.table(fileparams,header=TRUE)
-    start <- nrow(estim)/2
+    start <- floor(nrow(estim)/2)
     end <- nrow(estim)
     
     # plot bounds for mu
@@ -31,7 +31,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
             points(estim[start:end,2*i-1],estim[start:end,2*i],pch=19,cex=0.2,col=alpha(i+1,0.3))
             
             if(!is.null(truePar))
-                points(truePar[2*i-1],par[2*i],pch=19)
+                points(truePar[2*i-1],truePar[2*i],pch=19)
         }
     }
     
