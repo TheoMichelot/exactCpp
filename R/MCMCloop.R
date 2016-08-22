@@ -1,30 +1,47 @@
 
 #' Main loop of MCMC algorithm
 #' 
-#' @param allArgs List of all arguments: [add itemized list here]
+#' @param allArgs List of all arguments, as returned by \code{\link{setupMCMC}}:
+#' \item{obs}{Matrix of observations}
+#' \item{map}{Map of habitats}
+#' \item{nbState}{Number of states}
+#' \item{nbIter}{Number of iterations}
+#' \item{adapt}{TRUE if adaptative model, FALSE otherwise}
+#' \item{par0}{Initial movement parameters}
+#' \item{rates0}{Initial switching rates}
+#' \item{priorMean}{Mean of priors for movement parameters}
+#' \item{priorSD}{SD of priors for movement parameters}
+#' \item{priorShape}{Shape of prior for switching rates}
+#' \item{proposalSD}{SD of proposal distribution for movement parameters}
+#' \item{controls}{See args of \code{\link{setupMCMC}}}
+#' \item{homog}{See args of \code{\link{setupMCMC}}}
+#' \item{fileparams}{Output file for sampled movement parameters}
+#' \item{filerates}{Output file for sampled switching rates}
+#' \item{aSwitches}{Matrix of actual switches (initial value)}
+#' \item{nbActual}{Number of actual switches (initial value)}
+#' \item{whichActual}{Indices of actual switches (initial value)}
 MCMCloop <- function(allArgs)
 {
     # unpack arguments
-    nbState <- allArgs$nbState
+    obs <- allArgs$obs
+    nbObs <- nrow(obs)
     map <- allArgs$map
+    nbState <- allArgs$nbState
+    nbIter <- allArgs$nbIter
     adapt <- allArgs$adapt
-    obs <- allArgs$obs
-    nbObs <- nrow(allArgs$obs)
-    obs <- allArgs$obs
+    par0 <- allArgs$par0
+    rates0 <- allArgs$rates0
     priorMean <- allArgs$priorMean
     priorSD <- allArgs$priorSD
+    priorShape <- allArgs$priorShape
     proposalSD <- allArgs$proposalSD
-    shape <- allArgs$shape
     controls <- allArgs$controls
-    nbIter <- allArgs$nbIter
-    map <- allArgs$map
     homog <- allArgs$homog
     fileparams <- allArgs$fileparams
     filerates <- allArgs$filerates
     aSwitches <- allArgs$aSwitches
     nbActual <- allArgs$nbActual
     whichActual <- allArgs$whichActual
-    adapt <- allArgs$adapt
     
     t <- Sys.time()
     accTraj <- 0
@@ -142,9 +159,9 @@ MCMCloop <- function(allArgs)
         # update jump rate k
         if(!bk & nbActual>0) {
             if(adapt)
-                rates <- updateRate(allData, indSwitchAll, controls$kappa, shape[1], shape[2], nbState)
+                rates <- updateRate(allData, indSwitchAll, controls$kappa, priorShape[1], priorShape[2], nbState)
             else
-                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, shape[1], shape[2], nbState)
+                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, priorShape[1], priorShape[2], nbState)
         }
         
         # print switching rates to file

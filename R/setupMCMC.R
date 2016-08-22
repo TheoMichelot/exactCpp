@@ -40,7 +40,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         map <- matrix(1,nrow=1,ncol=1)
     } else
         adapt <- TRUE
-
+    
     ###############
     ## Read data ##
     ###############
@@ -51,7 +51,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     
     # enable references by "name" 
     colX <- 1; colY <- 2; colTime <- 3; colState <- 4; colHabitat <- 5; colJump <- 6; colBehav <- 7
-
+    
     nbHabitat <- length(unique(c(map))) # count habitat types
     if(adapt)
         nbState <- nbHabitat
@@ -78,7 +78,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         priorSD <- c(mPriorSD,bPriorSD,vPriorSD) 
     } else
         priorSD <- c(priorSD$m,priorSD$b,priorSD$v) 
-
+    
     # MH proposals (on log scale for b and v)
     if(is.null(proposalSD)) {
         mProposalSD <- rep(c(0.03,0.03),nbState)
@@ -91,7 +91,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     # Initial lambda (non-diagonal elements, filled row-wise)
     if(is.null(rates0))
         rates0 <- rep(1,nbState*(nbState-1))
-
+    
     ####################
     ## Prepare output ##
     ####################
@@ -154,21 +154,21 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
         controls$SDP <- 0.15
     
     return(list(obs=obs,
+                map=map,
+                nbState=nbState,
+                nbIter=nbIter,
+                adapt=adapt,
                 par0=par,
                 rates0=rates0,
-                nbState=nbState,
                 priorMean=priorMean,
                 priorSD=priorSD,
+                priorShape=priorShape,
                 proposalSD=proposalSD,
-                shape=shape,
                 controls=controls,
-                nbIter=nbIter,
-                map=map,
                 homog=homog,
                 fileparams=fileparams,
                 filerates=filerates,
                 aSwitches=aSwitches,
                 nbActual=nbActual,
-                whichActual=whichActual,
-                adapt=adapt))
+                whichActual=whichActual))
 }
