@@ -134,7 +134,10 @@ MCMCloop <- function(allArgs)
         # ranks of data by time
         ranksAll <- rank(allData[,colTime])
         # indices of actual switches among observations
-        indSwitchAll <- ranksAll[1:nbActual]
+        if(nbActual>0)
+            indSwitchAll <- ranksAll[1:nbActual]
+        else
+            indSwitchAll <- NULL
         # indices of observations among actual switches
         indObsAll <- ranksAll[(nbActual+1):nrow(allData)]
         

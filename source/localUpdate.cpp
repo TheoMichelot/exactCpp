@@ -18,18 +18,18 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     double X2 = allData(jorder-2,colX);
     double Y2 = allData(jorder-2,colY);
     int S2 = allData(jorder-2,colState);
-    
+
     double T1 = allData(jorder-1,colTime);
     double X1 = allData(jorder-1,colX);
     double Y1 = allData(jorder-1,colY);
     int S1 = allData(jorder-1,colState);
-    
+
     int H1 = findRegion(X1,Y1,map);
     
     double Tj = allData(jorder,colTime);
     double Xj = allData(jorder,colX);
     double Yj = allData(jorder,colY);
-        
+ 
     // old log-likelihood
     arma::vec oldMove2 = rawMove(par,S2,T1-T2,X2,Y2,nbState);
     double oldLogLX2 = R::dnorm(X1,X2+oldMove2(0),oldMove2(2),1);
@@ -40,7 +40,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     double oldLogLY1 = R::dnorm(Yj,Y1+oldMove1(1),oldMove1(3),1);
     
     double oldLogL = oldLogLX1 + oldLogLY1 + oldLogLX2 + oldLogLY2;
-    
+
     // propose new location
     double Xnew = R::rnorm(X1,SDP);
     double Ynew = R::rnorm(Y1,SDP);
@@ -61,7 +61,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
             }
         }
     }
-    
+
     // probabilities of actual switch
     arma::vec rate1(nbState);
     arma::vec rateNew(nbState);
@@ -79,7 +79,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
         newHfactor = rateNew(S1-1)/rate1(S1-1);
     }
     // else newHfactor is always 1, right?
-    
+
 //     Rcout << "S1 = " << S1 << "; S2 = " << S2 << "; H1 = " << H1 << "; Hnew = " << Hnew << std::endl;
 //     Rcout << arma::conv_to< arma::rowvec >::from(rateNew) << arma::conv_to< arma::rowvec >::from(rate1) << std::endl;
     
@@ -107,6 +107,6 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
         aSwitches(prev,colX) = Xnew;
         aSwitches(prev,colY) = Ynew;
     }
-    
+
     return aSwitches;
 }

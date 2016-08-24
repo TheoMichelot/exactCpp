@@ -81,7 +81,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             double emy = move(1);
             double sdx = move(2);
             double sdy = move(3);
-
+            
             // simulate location at time t
             subData(t,colX) = R::rnorm(Xfrom+emx,sdx);
             subData(t,colY) = R::rnorm(Yfrom+emy,sdy);
@@ -138,7 +138,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
         
         t = t+1;
     }
-    
+
     List res(4);
     res[0] = subData;
     res[1] = indObs+1; // +1 for compatibility with R
