@@ -41,6 +41,9 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     } else
         adapt <- TRUE
     
+    if(any(par0$b<0))
+        stop("Initial values for b should be positive (we really estimate -b).")
+    
     ###############
     ## Read data ##
     ###############
@@ -112,6 +115,9 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     cat(file=fileparams, "\n", par, "\n", append=TRUE)
     
     filerates <- paste("rates", d, ".txt", sep = "")
+    
+    # initialize file (to make sure it's empty)
+    cat(file=filerates, "", sep="")
     # Header
     for(state1 in 1:nbState)
         for(state2 in 1:nbState)
