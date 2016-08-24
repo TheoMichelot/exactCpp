@@ -23,29 +23,27 @@ map <- matrix(1,nrow=12,ncol=12)
 map[7:12,] <- 2
 
 # movement parameters
-mu <- matrix(c(0,0,10,0), ncol=2, byrow=TRUE)
-b <- c(-2,-0.5)
-v <- c(3,1)
+mu <- matrix(c(0,0,0,0), ncol=2, byrow=TRUE)
+b <- c(-4,-0.1)
+v <- c(1,10)
 
 rates <- rep(0.1,2)
 
 set.seed(1)
 
 # simulate observations
-sim <- simDataOU(mu=mu, b=b, v=v, rates=rates, map=NULL)
+sim <- simDataOU(mu=mu, b=b, v=v, rates=rates, map=NULL, duration=500)
 obs <- as.matrix(sim[,c(1,2,4)])
 
 # initial parameters
 nbState <- length(b)
-mpar <- rep(c(0,0),nbState) # centers of attraction
-bpar <- rep(1,nbState) # coefficients for matrix B
-vpar <- rep(2,nbState) # coefficients for matrix Lambda
-par0 <- list(m=mpar,b=bpar,v=vpar)
-rates0 <- rep(0.1,nbState*(nbState-1))
+par0 <- list(m=c(t(mu)),b=-b,v=v)
+rates0 <- rates
 
-homog=list(mHomog=FALSE, bHomog=FALSE, vHomog=FALSE)
+homog=list(mHomog=TRUE, bHomog=FALSE, vHomog=FALSE)
+controls=list(kappa=0.2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15)
 
-allArgs <- setupMCMC(obs, par0, rates0, map=NULL, homog=homog, nbState=nbState)
+allArgs <- setupMCMC(obs, par0, rates0, map=NULL, nbState=2, homog=homog, nbIter=5e5, controls=controls)
 mod <- MCMCloop(allArgs)
 
 estim <- read.table(mod$fileparams,header=TRUE)
