@@ -23,16 +23,16 @@ map <- matrix(1,nrow=12,ncol=12)
 map[7:12,] <- 2
 
 # movement parameters
-mu <- matrix(c(5,6,5,6), ncol=2, byrow=TRUE)
+mu <- matrix(c(0,0,10,0), ncol=2, byrow=TRUE)
 b <- c(-2,-0.5)
-v <- c(3,0.5)
+v <- c(3,1)
 
-rates <- rep(0.5,2)
+rates <- rep(0.1,2)
 
 set.seed(1)
 
 # simulate observations
-sim <- simDataOU(mu=mu, b=b, v=v, rates=rates, map=map)
+sim <- simDataOU(mu=mu, b=b, v=v, rates=rates, map=NULL)
 obs <- as.matrix(sim[,c(1,2,4)])
 
 # initial parameters
@@ -41,12 +41,14 @@ mpar <- rep(c(0,0),nbState) # centers of attraction
 bpar <- rep(1,nbState) # coefficients for matrix B
 vpar <- rep(2,nbState) # coefficients for matrix Lambda
 par0 <- list(m=mpar,b=bpar,v=vpar)
-rates0 <- rep(1,nbState*(nbState-1))
+rates0 <- rep(0.1,nbState*(nbState-1))
 
-homog=list(mHomog=TRUE, bHomog=FALSE, vHomog=FALSE)
+homog=list(mHomog=FALSE, bHomog=FALSE, vHomog=FALSE)
 
-allArgs <- setupMCMC(obs, par0, rates0, map=map, homog=homog)
+allArgs <- setupMCMC(obs, par0, rates0, map=NULL, homog=homog, nbState=nbState)
 mod <- MCMCloop(allArgs)
+
+estim <- read.table(mod$fileparams,header=TRUE)
 
 allPlots(nbState=nbState, fileparams=mod$fileparams, filerates=mod$filerates,
          truePar=c(as.vector(t(mu)),b,v))
