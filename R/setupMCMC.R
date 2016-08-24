@@ -25,7 +25,7 @@
 #' \item{thin}{Thinning factor;}
 #' \item{prUpdateMove}{Probability of updating movement parameters at each iteration.}
 setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
-                      priorMean=NULL, priorSD=NULL, proposalSD=NULL, shape=c(4,4), nbIter=5e5, 
+                      priorMean=NULL, priorSD=NULL, proposalSD=NULL, priorShape=c(4,4), nbIter=5e5, 
                       map=NULL, nbState=NULL, 
                       controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15))
 {
