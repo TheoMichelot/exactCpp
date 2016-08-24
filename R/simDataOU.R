@@ -5,12 +5,19 @@
 #' @param b Vector of b parameters.
 #' @param v Vector of v parameters.
 #' @param rates Vector of switching rates, e.g (lambda_12, lambda_13, lambda_21, lambda_23, lambda_31, lambda_32).
+#' @param map Map of habitats.
 #' @param interval Interval between observations.
 #' @param duration Duration between first and last observations.
 #' @param write If TRUE, the simulated data are written into the file obs.csv (default: FALSE).
-simDataOU <- function(mu, b, v, rates, map, interval=1, duration=500, write=FALSE)
+simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write=FALSE)
 {
     nbState <- length(b)
+    
+    adapt <- TRUE # adaptative case?
+    if(is.null(map)) {
+        map <- matrix(1,1,1)
+        adapt <- FALSE
+    }
     
     ############################
     ## Prepare the parameters ##
@@ -53,10 +60,11 @@ simDataOU <- function(mu, b, v, rates, map, interval=1, duration=500, write=FALS
                        habitat=rep(NA,nbData))
     
     # initial location
-    data$x[1] <- 4
-    data$y[1] <- 6
-    data$habitat[1] <- findRegion(data$x[1],data$y[1],map)
-    data$state[1] <- data$habitat[1]
+    data$state[1] <- sample(1:nbState,size=1)
+    if(adapt)
+        data$habitat[1] <- data$state[1]
+    data$x[1] <- mu[data$state[1],1]
+    data$y[1] <- mu[data$state[1],2]
     
     # is the data point an observation? (or a potential switch)
     isObs <- (times %in% obsTimes)
@@ -75,15 +83,22 @@ simDataOU <- function(mu, b, v, rates, map, interval=1, duration=500, write=FALS
         data$x[t] <- rnorm(1,meanx,sd)
         data$y[t] <- rnorm(1,meany,sd)
         
-        data$habitat[t] <- findRegion(data$x[t],data$y[t],map)
+        if(adapt)
+            data$habitat[t] <- findRegion(data$x[t],data$y[t],map)
         
         # if potential switch
         if(!isObs[t]) {
-            prJumpNow <- lambda[data$state[t-1],data$habitat[t]]/kappa
-            
-            if(runif(1)<prJumpNow)
-                data$state[t] <- data$habitat[t]
+            if(adapt)
+                prJumpNow <- lambda[data$state[t-1],data$habitat[t]]/kappa
             else
+                prJumpNow <- sum(lambda[data$state[t-1],])/kappa
+            
+            if(runif(1)<prJumpNow) {
+                if(adapt)
+                    data$state[t] <- data$habitat[t]
+                else
+                    data$state[t] <- sample(1:nbState,size=1,prob=lambda[data$state[t-1],])
+            } else
                 data$state[t] <- data$state[t-1]
         } else
             data$state[t] <- data$state[t-1]
@@ -92,16 +107,28 @@ simDataOU <- function(mu, b, v, rates, map, interval=1, duration=500, write=FALS
     # only keep obervations (remove switches)
     obs <- data[isObs,]
     
-    # plot observations on map (fisher-type)
     par(mfrow=c(1,1))
     pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
-    # image(seq(0.5,16.5,by=1),seq(0.5,10.5,by=1),map,xlab="x",ylab="y",col=pal[1:nbState]) # fisher map
-    image(seq(0.5,11.5,by=1),seq(0.5,11.5,by=1),map,xlab="x",ylab="y",col=pal[1:nbState]) # 2-state map
+    
+    if(adapt)
+        image(seq(0.5,nrow(map)-0.5,by=1),seq(0.5,ncol(map)-0.5,by=1),map,xlab="x",ylab="y",col=pal[1:nbState])
+    else {
+        xmin <- min(obs[,1])
+        xmax <- max(obs[,1])
+        xmid <- (xmin+xmax)/2
+        ymin <- min(obs[,2])
+        ymax <- max(obs[,2])
+        ymid <- (ymin+ymax)/2
+        l <- max(xmax-xmin,ymax-ymin)/2
+        plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[,3]],cex=0.8,
+             xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l))
+    }
+        
     points(obs[,1],obs[,2],pch=21,bg=pal[obs[,3]],cex=0.8,type="o")
-
+    
     if(write)
         write.csv(obs[,c(1,2,4)],file="obs.csv",row.names=FALSE)        
-
+    
     return(obs)
 }
 
