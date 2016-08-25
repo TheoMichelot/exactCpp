@@ -23,9 +23,9 @@ map <- matrix(1,nrow=12,ncol=12)
 map[7:12,] <- 2
 
 # movement parameters
-mu <- matrix(c(0,0,0,0), ncol=2, byrow=TRUE)
-b <- c(-4,-0.1)
-v <- c(1,10)
+mu <- matrix(c(0,0,10,0), ncol=2, byrow=TRUE)
+b <- c(-0.5,-1)
+v <- c(1,0.5)
 
 rates <- rep(0.1,2)
 
@@ -40,13 +40,15 @@ nbState <- length(b)
 par0 <- list(m=c(t(mu)),b=-b,v=v)
 rates0 <- rates
 
-homog=list(mHomog=TRUE, bHomog=FALSE, vHomog=FALSE)
+homog=list(mHomog=FALSE, bHomog=FALSE, vHomog=FALSE)
 controls=list(kappa=0.2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15)
 
-allArgs <- setupMCMC(obs, par0, rates0, map=NULL, nbState=2, homog=homog, nbIter=5e5, controls=controls)
+allArgs <- setupMCMC(obs, par0, rates0, map=NULL, nbState=2, homog=homog, controls=controls, 
+                     priorShape=c(12,4))
 mod <- MCMCloop(allArgs)
 
 estim <- read.table(mod$fileparams,header=TRUE)
+rates <- read.table(mod$filerates,header=TRUE)
 
 allPlots(nbState=nbState, fileparams=mod$fileparams, filerates=mod$filerates,
          truePar=c(as.vector(t(mu)),b,v))
