@@ -19,7 +19,7 @@ arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, i
     arma::vec mpar = par(arma::span(0,2*nbState-1));
     arma::vec bpar = par(arma::span(2*nbState,3*nbState-1));
     arma::vec vpar = par(arma::span(3*nbState,4*nbState-1));
-
+    
     double mux = mpar(2*state-2);
     double muy = mpar(2*state-1);
     double b = -bpar(state-1);

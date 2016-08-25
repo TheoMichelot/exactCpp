@@ -12,7 +12,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambdapar, int nbState, arma::mat map,
-                  bool adaptative)
+                  bool adapt)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -105,7 +105,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             
             // probabilities of actual switch
             arma::rowvec probs(nbState);
-            if(adaptative) {
+            if(adapt) {
                 probs.zeros();
                 probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
             } 

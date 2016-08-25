@@ -18,7 +18,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
     
     arma::mat subObs = subData.rows(indObs);
     int len = subObs.n_rows;
-    
+
     double Tbeg = subObs(0,colTime);
     double Tend = subObs(len-1,colTime);
     
@@ -66,7 +66,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
             count = count+1;
         }
     }
-
+    
     // actual switches and observations between Tbeg and Tend
     arma::mat aSubData = join_cols(aSwitches.rows(whichActual),subObs);
     
@@ -90,13 +90,13 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
         int which = aIndObs(i+1)-1; // index of actual switch
         double deltaT = aSubData(which+1,colTime) - aSubData(which,colTime); // time interval between switch and obs
         int state = aSubData(which,colState); // state of actual switch
-        
+ 
         arma::vec move = rawMove(par,state,deltaT,aSubData(which,colX),aSubData(which,colY),nbState);
         double emx = move(0);
         double emy = move(1);
         double sdx = move(2);
         double sdy = move(3);
-        
+
         oldLikeX(i) = R::dnorm(aSubData(which+1,colX),
                  aSubData(which,colX)+emx, sdx, 1);
         
