@@ -22,7 +22,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
 
     # plot mu
-    plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(pal[1],0.3),
+    plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(pal[1],0.5),
          xlab="mu_x",ylab="mu_y",xlim=c(muxmin,muxmax),ylim=c(muymin,muymax))
     
     if(!is.null(truePar))
@@ -30,7 +30,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     
     if(nbState>1) {
         for(i in 2:nbState) {
-            points(estim[start:end,2*i-1],estim[start:end,2*i],pch=19,cex=0.2,col=alpha(pal[i],0.3))
+            points(estim[start:end,2*i-1],estim[start:end,2*i],pch=19,cex=0.2,col=alpha(pal[i],0.5))
             
             if(!is.null(truePar))
                 points(truePar[2*i-1],truePar[2*i],pch=19)
@@ -39,7 +39,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     
     # plot log(b) vs log(v)
     plot(log(estim[start:end,2*nbState+1]),log(estim[start:end,3*nbState+1]),pch=19,cex=0.2,
-         col=alpha(pal[1],0.3),xlim=c(bmin,bmax),ylim=c(vmin,vmax),xlab="log(b)",ylab="log(v)")
+         col=alpha(pal[1],0.5),xlim=c(bmin,bmax),ylim=c(vmin,vmax),xlab="log(b)",ylab="log(v)")
     
     if(!is.null(truePar))
         points(log(-truePar[2*nbState+1]),log(truePar[3*nbState+1]),pch=19)
@@ -47,7 +47,7 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     if(nbState>1) {
         for(i in 2:nbState) {
             points(log(estim[start:end,2*nbState+i]),log(estim[start:end,3*nbState+i]),pch=19,cex=0.2,
-                   col=alpha(pal[i],0.3))
+                   col=alpha(pal[i],0.5))
             
             if(!is.null(truePar))
                 points(log(-truePar[2*nbState+i]),log(truePar[3*nbState+i]),pch=19)
