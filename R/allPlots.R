@@ -20,6 +20,17 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
     bmin <- min(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
     vmax <- max(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
     vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
+    
+    if(!is.null(truePar)) {
+        muxmax <- max(muxmax, truePar[2*(1:nbState)-1])
+        muxmin <- min(muxmin, truePar[2*(1:nbState)-1])
+        muymax <- max(muymax, truePar[2*(1:nbState)])
+        muymin <- min(muymin, truePar[2*(1:nbState)])
+        bmax <- max(bmax, log(-truePar[(2*nbState+1):(3*nbState)]))
+        bmin <- min(bmin, log(-truePar[(2*nbState+1):(3*nbState)]))
+        vmax <- max(vmax, log(truePar[(3*nbState+1):(4*nbState)]))
+        vmin <- min(vmin, log(truePar[(3*nbState+1):(4*nbState)]))
+    }
 
     # plot mu
     plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(pal[1],0.5),
