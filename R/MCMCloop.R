@@ -73,7 +73,7 @@ MCMCloop <- function(allArgs)
         # times of beginning and end
         Tbeg <- subObs[1,colTime]
         Tend <- subObs[len,colTime]
-        
+
         ####################################
         ## Simulate movement and switches ##
         ####################################
@@ -85,11 +85,10 @@ MCMCloop <- function(allArgs)
         indSwitch <- indSwitch[order(indSwitch)]
         bk <- sim[[4]]
         
-        
         if(!bk) {
             # compute the likelihood of the trajectory
             HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState)
-            
+
             if(runif(1)<HR) {
                 
                 accTraj <- accTraj + 1
@@ -146,7 +145,7 @@ MCMCloop <- function(allArgs)
         allData <- allData[ord,]
         
         parCopy <- par
-        
+
         # parameter update
         if(runif(1)<controls$prUpdateMove)
             par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,
@@ -158,7 +157,7 @@ MCMCloop <- function(allArgs)
         # print parameters to file
         if(iter%%controls$thin==0)
             cat(file=fileparams, round(par,6), "\n", append = TRUE)
-        
+
         # update jump rate k
         if(!bk & nbActual>0) {
             if(adapt)

@@ -9,7 +9,8 @@
 #' @param interval Interval between observations.
 #' @param duration Duration between first and last observations.
 #' @param write If TRUE, the simulated data are written into the file obs.csv (default: FALSE).
-simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write=FALSE)
+#' @param showPlot If TRUE, the simulated data are plotted (default).
+simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write=FALSE, showPlot=TRUE)
 {
     nbState <- length(b)
     
@@ -107,24 +108,26 @@ simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write
     # only keep obervations (remove switches)
     obs <- data[isObs,]
     
-    par(mfrow=c(1,1))
-    pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
-    
-    if(adapt)
-        image(seq(0.5,nrow(map)-0.5,by=1),seq(0.5,ncol(map)-0.5,by=1),map,xlab="x",ylab="y",col=pal[1:nbState])
-    else {
-        xmin <- min(obs[,1])
-        xmax <- max(obs[,1])
-        xmid <- (xmin+xmax)/2
-        ymin <- min(obs[,2])
-        ymax <- max(obs[,2])
-        ymid <- (ymin+ymax)/2
-        l <- max(xmax-xmin,ymax-ymin)/2
-        plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[,3]],cex=0.8,
-             xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l))
-    }
+    if(showPlot) {
+        par(mfrow=c(1,1))
+        pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
         
-    points(obs[,1],obs[,2],pch=21,bg=pal[obs[,3]],cex=0.8,type="o")
+        if(adapt)
+            image(seq(0.5,nrow(map)-0.5,by=1),seq(0.5,ncol(map)-0.5,by=1),map,xlab="x",ylab="y",col=pal[1:nbState])
+        else {
+            xmin <- min(obs[,1])
+            xmax <- max(obs[,1])
+            xmid <- (xmin+xmax)/2
+            ymin <- min(obs[,2])
+            ymax <- max(obs[,2])
+            ymid <- (ymin+ymax)/2
+            l <- max(xmax-xmin,ymax-ymin)/2
+            plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[,3]],cex=0.8,
+                 xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l),xlab="x",ylab="y")
+        }
+        
+        points(obs[,1],obs[,2],pch=21,bg=pal[obs[,3]],cex=0.8,type="o")
+    }
     
     if(write)
         write.csv(obs[,c(1,2,4)],file="obs.csv",row.names=FALSE)        
