@@ -85,8 +85,8 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     # MH proposals (on log scale for b and v)
     if(is.null(proposalSD)) {
         mProposalSD <- rep(c(0.03,0.03),nbState)
-        bProposalSD <- rep(0.03,nbState)
-        vProposalSD <- rep(0.03,nbState)
+        bProposalSD <- rep(0.1,nbState)
+        vProposalSD <- rep(0.1,nbState)
         proposalSD <- c(mProposalSD,bProposalSD,vProposalSD)
     } else
         proposalSD <- c(proposalSD$m,proposalSD$b,proposalSD$v)
