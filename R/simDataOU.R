@@ -122,7 +122,7 @@ simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write
             ymax <- max(obs[,2])
             ymid <- (ymin+ymax)/2
             l <- max(xmax-xmin,ymax-ymin)/2
-            plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[,3]],cex=0.8,
+            plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[1,3]],cex=0.8,
                  xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l),xlab="x",ylab="y")
         }
         
