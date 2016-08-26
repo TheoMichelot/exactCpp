@@ -1,5 +1,5 @@
 
-allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
+allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueState=NULL)
 {
     library(scales)
     pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
@@ -72,5 +72,15 @@ allPlots <- function(nbState, fileparams, filerates, truePar=NULL)
         for(i in 1:(nbState*(nbState-1)))
             plot(rates[start:end,i],type="l")
         par(mfrow=c(1,1))
+    }
+    
+    # plot most probable states
+    maxState <- apply(states,1,which.max)
+    if(is.null(trueState))
+        plot(maxState,type="o",pch=19,cex=0.5,ylab="state",main="Decoded states")
+    else {
+        par(mfrow=c(2,1))
+        plot(maxState,type="o",pch=19,cex=0.5,ylab="state",main="Decoded states")
+        plot(trueState,type="o",pch=19,cex=0.5,ylab="state",main="True states")
     }
 }

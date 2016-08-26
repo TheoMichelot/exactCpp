@@ -57,7 +57,9 @@ MCMCloop <- function(allArgs)
     rates <- allArgs$rates0
  
     bk <- FALSE
-       
+
+    states <- matrix(0,nrow=nbObs,ncol=nbState)
+    
     # MCMC loop
     for(iter in 1:nbIter) {
         # length of considered interval of observations
@@ -99,8 +101,9 @@ MCMCloop <- function(allArgs)
                 # Update proposals - states etc have changed
                 switches <- subData[c(0,indSwitch),,drop=FALSE]
                 
-                # Update Data states
-                obs[obs[,colTime]>=Tbeg & obs[,colTime]<=Tend,colState] <- subData[indObs,colState]
+                # Update data states
+                obs[point1:point2,colState] <- subData[indObs,colState]
+                states[point1:point2,obs[point1:point2,colState]] <- states[point1:point2,obs[point1:point2,colState]]+1
                 
                 # data's jump do not need updating it is always 0
                 
@@ -188,12 +191,13 @@ MCMCloop <- function(allArgs)
             accTrajAll[iter/controls$thin] <- accTraj/iter*100
             accParAll[iter/controls$thin] <- accPar/iter*100
         }
-        
+
         rm(allData)
     }
     
     return(list(fileparams=fileparams,
                 filerates=filerates,
                 accTrajAll=accTrajAll,
-                accParAll=accParAll))
+                accParAll=accParAll,
+                states=states))
 }
