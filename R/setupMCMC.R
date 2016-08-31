@@ -65,6 +65,10 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     obs[,colJump] <- 0 # jump for data point is always 0
     obs[,colBehav] <- 0 # behavioural states not known
     
+    # Make sure there are no NAs
+    if(any(is.na(obs[,c(colX,colY)])))
+        stop("There should be NAs in the data.")
+    
     #######################
     ## Set up parameters ##
     #######################

@@ -11,12 +11,12 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
-    
+
     // pick out points that are informative about movement
     int indMin = 0;
     while(allData(indMin,colTime)<=obs(0,colTime))
         indMin = indMin + 1;
-    
+
     arma::mat allData2 = allData.rows(arma::span(indMin,allData.n_rows-1));
     int l = allData2.n_rows;
 
@@ -48,7 +48,7 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     
     oldMove = rawMove(par,state,deltaT,preX(0),preY(0),nbState);
     newMove = rawMove(newPar,state,deltaT,preX(0),preY(0),nbState);
-    
+
     // oldMove = (emx,emy,sdx,sdy)
     oldLogLX(0) = R::dnorm(dX(0), oldMove(0), oldMove(2), 1);
     oldLogLY(0) = R::dnorm(dY(0), oldMove(1), oldMove(3), 1);
@@ -61,14 +61,14 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
 
         oldMove = rawMove(par,state,deltaT,preX(i),preY(i),nbState);
         newMove = rawMove(newPar,state,deltaT,preX(i),preY(i),nbState);
-        
+
         // oldMove = (emx,emy,sdx,sdy)
         oldLogLX(i) = R::dnorm(dX(i), oldMove(0), oldMove(2), 1);
         oldLogLY(i) = R::dnorm(dY(i), oldMove(1), oldMove(3), 1);
         newLogLX(i) = R::dnorm(dX(i), newMove(0), newMove(2), 1);
         newLogLY(i) = R::dnorm(dY(i), newMove(1), newMove(3), 1);
     }
-    
+
     // log Hastings ratio
     double logHR = newLogPrior - oldLogPrior + sum(newLogLX) + sum(newLogLY) - sum(oldLogLX) - sum(oldLogLY);
     

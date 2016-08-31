@@ -19,14 +19,14 @@ arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, i
     arma::vec mpar = par(arma::span(0,2*nbState-1));
     arma::vec bpar = par(arma::span(2*nbState,3*nbState-1));
     arma::vec vpar = par(arma::span(3*nbState,4*nbState-1));
-    
+
     double mux = mpar(2*state-2);
     double muy = mpar(2*state-1);
     double b = -bpar(state-1);
     double v = vpar(state-1);
     double phi = exp(b*deltaT);
     double sd = sqrt(v*(1-phi*phi));
-    
+
     arma::vec res(4);
     res(0) = (1-phi)*(mux-x); // x mean (new mean - old location)
     res(1) = (1-phi)*(muy-y); // y mean (new mean - old location)

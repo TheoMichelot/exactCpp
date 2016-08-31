@@ -148,7 +148,7 @@ MCMCloop <- function(allArgs)
         allData <- allData[ord,]
         
         parCopy <- par
-
+        
         # parameter update
         if(runif(1)<controls$prUpdateMove)
             par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,
