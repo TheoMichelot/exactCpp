@@ -21,6 +21,7 @@ allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueS
     vmax <- max(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
     vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
     
+    # make sure true values are within plot bounds, if provided
     if(!is.null(truePar)) {
         muxmax <- max(muxmax, truePar[2*(1:nbState)-1])
         muxmin <- min(muxmin, truePar[2*(1:nbState)-1])
@@ -32,9 +33,17 @@ allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueS
         vmin <- min(vmin, log(truePar[(3*nbState+1):(4*nbState)]))
     }
 
+    # to ensure x and y scales are identical
+    muxmid <- (muxmin+muxmax)/2
+    muymid <- (muymin+muymax)/2
+    lxy <- max(muxmax-muxmin,muymax-muymin)/2
+    bmid <- (bmin+bmax)/2
+    vmid <- (vmin+vmax)/2
+    lbv <- max(bmax-bmin,vmax-vmin)/2
+    
     # plot mu
     plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(pal[1],0.5),
-         xlab="mu_x",ylab="mu_y",xlim=c(muxmin,muxmax),ylim=c(muymin,muymax))
+         xlab="mu_x",ylab="mu_y",xlim=c(muxmid-lxy,muxmid+lxy),ylim=c(muymid-lxy,muymid+lxy))
     
     if(!is.null(truePar))
         points(truePar[1],truePar[2],pch=19)
@@ -50,7 +59,7 @@ allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueS
     
     # plot log(b) vs log(v)
     plot(log(estim[start:end,2*nbState+1]),log(estim[start:end,3*nbState+1]),pch=19,cex=0.2,
-         col=alpha(pal[1],0.5),xlim=c(bmin,bmax),ylim=c(vmin,vmax),xlab="log(b)",ylab="log(v)")
+         col=alpha(pal[1],0.5),xlim=c(bmid-lbv,bmid+lbv),ylim=c(vmid-lbv,vmid+lbv),xlab="log(b)",ylab="log(v)")
     
     if(!is.null(truePar))
         points(log(-truePar[2*nbState+1]),log(truePar[3*nbState+1]),pch=19)
