@@ -10,7 +10,9 @@
 #' @param duration Duration between first and last observations.
 #' @param write If TRUE, the simulated data are written into the file obs.csv (default: FALSE).
 #' @param showPlot If TRUE, the simulated data are plotted (default).
-simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write=FALSE, showPlot=TRUE)
+#' @param points If TRUE, the simulated data are plotted as dots (default), otherwise only segments are
+#' plotted.
+simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write=FALSE, showPlot=TRUE, points=TRUE)
 {
     nbState <- length(b)
     
@@ -122,11 +124,21 @@ simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write
             ymax <- max(obs[,2])
             ymid <- (ymin+ymax)/2
             l <- max(xmax-xmin,ymax-ymin)/2
-            plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[1,3]],cex=0.8,
-                 xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l),xlab="x",ylab="y")
+            
+            if(points) {
+                plot(obs[1,1],obs[1,2],pch=21,bg=pal[obs[1,3]],cex=0.8,
+                     xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l),xlab="x",ylab="y")                
+            } else {
+                plot(NA,xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l),xlab="x",ylab="y")    
+            }
         }
         
-        points(obs[,1],obs[,2],pch=21,bg=pal[obs[,3]],cex=0.8,type="o")
+        if(points) {
+            points(obs[,1],obs[,2],pch=21,bg=pal[obs[,3]],cex=0.8,type="o")
+        } else {
+            for(t in 2:nrow(obs))
+                segments(obs[t-1,1],obs[t-1,2],obs[t,1],obs[t,2],col=pal[obs[t-1,3]])
+        }
     }
     
     if(write)
