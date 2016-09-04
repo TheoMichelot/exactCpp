@@ -31,7 +31,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
 {
     par <- c(par0$m,par0$b,par0$v)
     
-    # Are we working with the adaptative model?
+    # are we working with the adaptative model?
     if(is.null(map)) {
         if(is.null(nbState))
             stop("'nbState' needs to be specified if no map is given.")
@@ -59,7 +59,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     if(adapt)
         nbState <- nbHabitat
     
-    # Set up rest of data matrix
+    # initialize habitats and states
     if(adapt) {
         obs[,colHabitat] <- findRegion(obs[,colX],obs[,colY],map)
         obs[,colState] <- obs[,colHabitat]
@@ -71,14 +71,14 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     obs[,colJump] <- 0 # jump for data point is always 0
     obs[,colBehav] <- 0 # behavioural states not known
     
-    # Make sure there are no NAs
+    # make sure there are no NAs
     if(any(is.na(obs[,c(colX,colY)])))
         stop("There should not be NAs in the data.")
     
     #######################
     ## Set up parameters ##
     #######################
-    # Priors (on log scale for b and v)
+    # priors (on log scale for b and v)
     if(is.null(priorMean))
         priorMean <- n2w(par,nbState)
     else
@@ -101,7 +101,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     } else
         proposalSD <- c(proposalSD$m,proposalSD$b,proposalSD$v)
     
-    # Initial lambda (non-diagonal elements, filled row-wise)
+    # initial rates (non-diagonal elements, filled row-wise)
     if(is.null(rates0))
         rates0 <- rep(controls$kappa/2,nbState*(nbState-1))
     
@@ -114,26 +114,26 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     
     # initialize file (to make sure it's empty)
     cat(file=fileparams, "", sep="")
-    # Header
+    # header
     for(state in 1:nbState)
         cat(file=fileparams, "mux", state, " muy", state, " ", append=TRUE, sep = "")
     for(state in 1:nbState)
         cat(file=fileparams, "b", state, " ", append=TRUE, sep = "")
     for(state in 1:nbState)
         cat(file=fileparams, "v", state, " ", append=TRUE, sep = "")
-    # First row
+    # first row
     cat(file=fileparams, "\n", par, "\n", append=TRUE)
     
     filerates <- paste("rates", d, ".txt", sep = "")
     
     # initialize file (to make sure it's empty)
     cat(file=filerates, "", sep="")
-    # Header
+    # header
     for(state1 in 1:nbState)
         for(state2 in 1:nbState)
             if(state1!=state2)
                 cat(file=filerates, "lambda", state1, state2, " ", append=TRUE, sep = "")
-    # First row
+    # first row
     cat(file=filerates, "\n", rates0, "\n", append = TRUE)
     
     ####################################
@@ -153,7 +153,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
                        Jump=rep(1,nbActual),
                        Behav=rep(0,nbActual))
     
-    # Controls
+    # controls
     if(is.null(controls))
         controls <- list()
     if(is.null(controls$kappa))
