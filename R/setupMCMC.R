@@ -103,7 +103,7 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     
     # Initial lambda (non-diagonal elements, filled row-wise)
     if(is.null(rates0))
-        rates0 <- rep(1,nbState*(nbState-1))
+        rates0 <- rep(controls$kappa/2,nbState*(nbState-1))
     
     ####################
     ## Prepare output ##

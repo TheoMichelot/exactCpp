@@ -108,7 +108,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             if(adapt) {
                 probs.zeros();
                 probs(subData(t,colHabitat)-1) = A(subData(t-1,colState)-1,subData(t,colHabitat)-1);
-            } 
+            }
             else
                 probs = A.row(subData(t-1,colState)-1);
             

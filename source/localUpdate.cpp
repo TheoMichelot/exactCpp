@@ -9,7 +9,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, arma::vec par, arma::vec lambdapar,
-                           double kappa, int nbState, double SDP, arma::mat map, bool adaptative)
+                           double kappa, int nbState, double SDP, arma::mat map, bool adapt)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -67,7 +67,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     arma::vec rateNew(nbState);
     double newHfactor = 1;
     
-    if(adaptative) {
+    if(adapt) {
         rate1.zeros();
         rate1(H1-1) = A(S2-1,H1-1);
         rate1(S2-1) = kappa - rate1(H1-1);
@@ -77,7 +77,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
         rateNew(S2-1) = kappa - rateNew(Hnew-1);
         
         newHfactor = rateNew(S1-1)/rate1(S1-1);
-    }
+
     // else newHfactor is always 1, right?
 
 //     Rcout << "S1 = " << S1 << "; S2 = " << S2 << "; H1 = " << H1 << "; Hnew = " << Hnew << std::endl;
