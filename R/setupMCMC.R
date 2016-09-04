@@ -6,6 +6,8 @@
 #' each of length the number of states.
 #' @param rates0 Vector of initial values for the switching rates. Must be of length 
 #' number of states * (number of states - 1).
+#' @param mty Vector indicating the type of model used in each state (1 for Brownian motion,
+#' 2 for location OU).
 #' @param homog List of mHomog, bHomog, and vHomog, which each indicate whether the corresponding movement
 #' parameter is homogeneous across states (TRUE) or not (FALSE -- default).
 #' @param priorMean List of means of priors for the movement parameters. Must have three elements: m, b, and v,
@@ -24,13 +26,11 @@
 #' \item{lenmax}{Maximum length of updated interval;}
 #' \item{thin}{Thinning factor;}
 #' \item{prUpdateMove}{Probability of updating movement parameters at each iteration.}
-setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
+setupMCMC <- function(obs, par0, rates0, mty=c(2,2,2), homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
                       priorMean=NULL, priorSD=NULL, proposalSD=NULL, priorShape=c(4,4), nbIter=5e5, 
                       map=NULL, nbState=NULL, 
                       controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15))
 {
-    par <- c(par0$m,par0$b,par0$v)
-    
     # are we working with the adaptative model?
     if(is.null(map)) {
         if(is.null(nbState))
@@ -78,6 +78,8 @@ setupMCMC <- function(obs, par0, rates0, homog=list(mHomog=FALSE,bHomog=FALSE,vH
     #######################
     ## Set up parameters ##
     #######################
+    par <- c(par0$m, par0$b, par0$v)
+    
     # priors (on log scale for b and v)
     if(is.null(priorMean))
         priorMean <- n2w(par,nbState)
