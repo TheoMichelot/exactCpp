@@ -1,10 +1,11 @@
 
 #' Simulate data from a switching OU process
 #' 
-#' @param mu Matrix of coordinates of centres of attraction (one row for each state)
-#' @param b Vector of b parameters.
-#' @param v Vector of v parameters.
-#' @param rates Vector of switching rates, e.g (lambda_12, lambda_13, lambda_21, lambda_23, lambda_31, lambda_32).
+#' @param par List of movement parameters. Must contain one vector for each state.
+#' @param rates Vector of switching rates, 
+#' e.g (lambda_12, lambda_13, lambda_21, lambda_23, lambda_31, lambda_32).
+#' @param mty Vector indicating the type of model used in each state (1 for Brownian motion,
+#' 2 for location OU).
 #' @param map Map of habitats.
 #' @param interval Interval between observations.
 #' @param duration Duration between first and last observations.
@@ -12,7 +13,8 @@
 #' @param showPlot If TRUE, the simulated data are plotted (default).
 #' @param points If TRUE, the simulated data are plotted as dots (default), otherwise only segments are
 #' plotted.
-simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write=FALSE, showPlot=TRUE, points=TRUE)
+simDataOU <- function(par, rates, mty=rep(2,length(par)), map=NULL, interval=1, duration=500, 
+                      write=FALSE, showPlot=TRUE, points=TRUE)
 {
     nbState <- length(b)
     
@@ -22,17 +24,7 @@ simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write
         adapt <- FALSE
     }
     
-    ############################
-    ## Prepare the parameters ##
-    ############################
-    B <- array(NA,c(2,2,nbState))
-    for(state in 1:nbState)
-        B[,,state] <- b[state]*diag(2)
-    
-    V <- array(NA,c(2,2,nbState))
-    for(state in 1:nbState)
-        V[,,state] <- v[state]*diag(2)
-    
+    # matrix of switching rates
     lambda <- diag(nbState)
     lambda[!lambda] <- rates
     lambda <- t(lambda) # filled column-wise
@@ -80,9 +72,19 @@ simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write
         # time since last observation
         dt <- times[t] - times[t-1]
         
-        meanx <- mu[data$state[t-1],1] + exp(b[data$state[t-1]]*dt)*(data$x[t-1]-mu[data$state[t-1],1])
-        meany <- mu[data$state[t-1],2] + exp(b[data$state[t-1]]*dt)*(data$y[t-1]-mu[data$state[t-1],2])
-        sd <- sqrt(v[data$state[t-1]]*(1-exp(2*b[data$state[t-1]]*dt)))
+        # state
+        state <- data$state[t-1]
+        
+        if(mty[state]==1) { # Brownian motion
+            meanx <- data$x[t-1]
+            meany <- data$y[t-1]
+            sd <- par[[state]][1]
+        } else { # Ornstein-Uhlenbeck
+            meanx <- par[[state]][1] + exp(par[[state]][3]*dt)*(data$x[t-1]-par[[state]][1])
+            meany <- par[[state]][2] + exp(par[[state]][3]*dt)*(data$y[t-1]-par[[state]][2])
+            sd <- sqrt(par[[state]][4]*(1-exp(2*par[[state]][3]*dt)))
+        }
+        
         data$x[t] <- rnorm(1,meanx,sd)
         data$y[t] <- rnorm(1,meany,sd)
         
@@ -115,7 +117,8 @@ simDataOU <- function(mu, b, v, rates, map=NULL, interval=1, duration=500, write
         pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
         
         if(adapt)
-            image(seq(0.5,nrow(map)-0.5,by=1),seq(0.5,ncol(map)-0.5,by=1),map,xlab="x",ylab="y",col=pal[1:nbState])
+            image(seq(0.5,nrow(map)-0.5,by=1),seq(0.5,ncol(map)-0.5,by=1),map,xlab="x",ylab="y",
+                  col=pal[1:nbState])
         else {
             xmin <- min(obs[,1])
             xmax <- max(obs[,1])
