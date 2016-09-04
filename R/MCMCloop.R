@@ -58,6 +58,7 @@ MCMCloop <- function(allArgs)
  
     bk <- FALSE
 
+    # for state probabilities
     states <- matrix(0,nrow=nbObs,ncol=nbState)
     
     # MCMC loop
@@ -90,7 +91,7 @@ MCMCloop <- function(allArgs)
         if(!bk) {
             # compute the likelihood of the trajectory
             HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState)
-
+            
             if(runif(1)<HR) {
                 
                 accTraj <- accTraj + 1
@@ -100,14 +101,18 @@ MCMCloop <- function(allArgs)
                 #######################
                 # Update proposals - states etc have changed
                 switches <- subData[c(0,indSwitch),,drop=FALSE]
-                
+
                 # Update data states
                 obs[point1:point2,colState] <- subData[indObs,colState]
-                states[point1:point2,obs[point1:point2,colState]] <- states[point1:point2,obs[point1:point2,colState]]+1
+                
+                # update state probabilities
+                states[point1:point2,obs[point1:point2,colState]] <- 
+                    states[point1:point2,obs[point1:point2,colState]]+1
                 
                 # data's jump do not need updating it is always 0
                 
-                # there is nothing outside the interval of Tbeg:Tend so that we can use the new Tswitch over old ATswitch
+                # there is nothing outside the interval of Tbeg:Tend so that we can use 
+                # the new Tswitch over old ATswitch
                 if(!any(aSwitches[,colTime]>Tend | aSwitches[,colTime]<Tbeg)) { # Rare!
                     aSwitches <- switches
                 } else {
@@ -164,9 +169,11 @@ MCMCloop <- function(allArgs)
         # update jump rate k
         if(!bk & nbActual>0) {
             if(adapt)
-                rates <- updateRate(allData, indSwitchAll, controls$kappa, priorShape[1], priorShape[2], nbState)
+                rates <- updateRate(allData, indSwitchAll, controls$kappa, 
+                                    priorShape[1], priorShape[2], nbState)
             else
-                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, priorShape[1], priorShape[2], nbState)
+                rates <- updateRate_unconstr(allData, indSwitchAll, controls$kappa, 
+                                             priorShape[1], priorShape[2], nbState)
         }
         
         # print switching rates to file
