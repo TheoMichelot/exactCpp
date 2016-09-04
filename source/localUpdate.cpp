@@ -77,7 +77,7 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
         rateNew(S2-1) = kappa - rateNew(Hnew-1);
         
         newHfactor = rateNew(S1-1)/rate1(S1-1);
-
+    }
     // else newHfactor is always 1, right?
 
 //     Rcout << "S1 = " << S1 << "; S2 = " << S2 << "; H1 = " << H1 << "; Hnew = " << Hnew << std::endl;
