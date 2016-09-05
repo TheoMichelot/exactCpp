@@ -12,7 +12,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambdapar, int nbState, arma::mat map,
-                  bool adapt)
+                  bool adapt, arma::vec mty)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -76,7 +76,7 @@ List simMove_rcpp(arma::mat subObs, arma::vec par, double kappa, arma::vec lambd
             double Yfrom = subData(t-1,colY);
             
             // compute distribution of location at time t
-            arma::vec move = rawMove(par,state,deltaT,Xfrom,Yfrom,nbState);
+            arma::vec move = rawMove(par,state,deltaT,Xfrom,Yfrom,nbState,mty(state-1));
             double emx = move(0);
             double emy = move(1);
             double sdx = move(2);

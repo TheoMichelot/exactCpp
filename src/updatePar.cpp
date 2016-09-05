@@ -1,13 +1,13 @@
 
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
-#include <updateMove_fisher.cpp>
+#include <updateMove.cpp>
 using namespace Rcpp;
 
 // [[Rcpp::export]]
 arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, arma::vec priorSD, 
                          arma::vec proposalSD, int nbState, bool mHomog, bool bHomog, bool vHomog, 
-                         arma::mat obs)
+                         arma::mat obs, arma::vec mty)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -34,7 +34,7 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     }
     
     // pick new movement parameters from proposal
-    List moveStep = updateMove_rcpp(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog);
+    List moveStep = updateMove_rcpp(par,priorMean,priorSD,proposalSD,nbState,mHomog,bHomog,vHomog,mty);
     arma::vec newPar = moveStep[0];
     double oldLogPrior = moveStep[1];
     double newLogPrior = moveStep[2];
@@ -46,8 +46,8 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     double deltaT = allData2(0,colTime) - allData(indMin-1,colTime); // interval between switch and obs
     int state = allData(indMin-1,colState); // state at previous switch
     
-    oldMove = rawMove(par,state,deltaT,preX(0),preY(0),nbState);
-    newMove = rawMove(newPar,state,deltaT,preX(0),preY(0),nbState);
+    oldMove = rawMove(par,state,deltaT,preX(0),preY(0),nbState,mty(state-1));
+    newMove = rawMove(newPar,state,deltaT,preX(0),preY(0),nbState,mty(state-1));
 
     // oldMove = (emx,emy,sdx,sdy)
     oldLogLX(0) = R::dnorm(dX(0), oldMove(0), oldMove(2), 1);
@@ -59,8 +59,8 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
         deltaT = allData2(i,colTime) - allData2(i-1,colTime);
         state = allData2(i-1,colState);
 
-        oldMove = rawMove(par,state,deltaT,preX(i),preY(i),nbState);
-        newMove = rawMove(newPar,state,deltaT,preX(i),preY(i),nbState);
+        oldMove = rawMove(par,state,deltaT,preX(i),preY(i),nbState,mty(state-1));
+        newMove = rawMove(newPar,state,deltaT,preX(i),preY(i),nbState,mty(state-1));
 
         // oldMove = (emx,emy,sdx,sdy)
         oldLogLX(i) = R::dnorm(dX(i), oldMove(0), oldMove(2), 1);

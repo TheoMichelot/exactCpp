@@ -11,7 +11,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch, arma::vec par,
-                     arma::mat aSwitches, int nbState)
+                     arma::mat aSwitches, int nbState, arma::vec mty)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -35,7 +35,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
         double deltaT = subData(which+1,colTime) - subData(which,colTime); // interval between switch and obs
         int state = subData(which,colState); // state at previous switch
         
-        arma::vec move = rawMove(par,state,deltaT,subData(which,colX),subData(which,colY),nbState);
+        arma::vec move = rawMove(par,state,deltaT,subData(which,colX),subData(which,colY),nbState,mty(state-1));
         double emx = move(0);
         double emy = move(1);
         double sdx = move(2);
@@ -91,7 +91,7 @@ double moveLike_rcpp(arma::mat subData, arma::uvec indObs, arma::uvec indSwitch,
         double deltaT = aSubData(which+1,colTime) - aSubData(which,colTime); // time interval between switch and obs
         int state = aSubData(which,colState); // state of actual switch
  
-        arma::vec move = rawMove(par,state,deltaT,aSubData(which,colX),aSubData(which,colY),nbState);
+        arma::vec move = rawMove(par,state,deltaT,aSubData(which,colX),aSubData(which,colY),nbState,mty(state-1));
         double emx = move(0);
         double emy = move(1);
         double sdx = move(2);

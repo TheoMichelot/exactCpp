@@ -2,14 +2,14 @@
 #include <RcppArmadillo.h>
 // [[Rcpp::depends(RcppArmadillo)]]
 
-#include <updateMove_fisher.cpp>
+#include <updateMove.cpp>
 
 using namespace std;
 using namespace Rcpp;
 
 // [[Rcpp::export]]
 arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, arma::vec par, arma::vec lambdapar,
-                           double kappa, int nbState, double SDP, arma::mat map, bool adapt)
+                           double kappa, int nbState, double SDP, arma::mat map, bool adapt, arma::vec mty)
 {
     // enable reference by "name"
     int colX = 0, colY = 1, colTime = 2, colState = 3, colHabitat = 4, colJump = 5, colBehav = 6;
@@ -31,11 +31,11 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
     double Yj = allData(jorder,colY);
  
     // old log-likelihood
-    arma::vec oldMove2 = rawMove(par,S2,T1-T2,X2,Y2,nbState);
+    arma::vec oldMove2 = rawMove(par,S2,T1-T2,X2,Y2,nbState,mty(S2-1));
     double oldLogLX2 = R::dnorm(X1,X2+oldMove2(0),oldMove2(2),1);
     double oldLogLY2 = R::dnorm(Y1,Y2+oldMove2(1),oldMove2(3),1);
     
-    arma::vec oldMove1 = rawMove(par,S1,Tj-T1,X1,Y1,nbState);
+    arma::vec oldMove1 = rawMove(par,S1,Tj-T1,X1,Y1,nbState,mty(S1-1));
     double oldLogLX1 = R::dnorm(Xj,X1+oldMove1(0),oldMove1(2),1);
     double oldLogLY1 = R::dnorm(Yj,Y1+oldMove1(1),oldMove1(3),1);
     
@@ -84,11 +84,11 @@ arma::mat localUpdate_rcpp(arma::mat allData, arma::mat aSwitches, int jorder, a
 //     Rcout << arma::conv_to< arma::rowvec >::from(rateNew) << arma::conv_to< arma::rowvec >::from(rate1) << std::endl;
     
     // new log-likelihood
-    arma::vec newMove2 = rawMove(par,S2,Tnew-T2,X2,Y2,nbState);
+    arma::vec newMove2 = rawMove(par,S2,Tnew-T2,X2,Y2,nbState,mty(S2-1));
     double newLogLX2 = R::dnorm(Xnew,X2+newMove2(0),newMove2(2),1);
     double newLogLY2 = R::dnorm(Ynew,Y2+newMove2(1),newMove2(3),1);
     
-    arma::vec newMove1 = rawMove(par,S1,Tj-Tnew,Xnew,Ynew,nbState);
+    arma::vec newMove1 = rawMove(par,S1,Tj-Tnew,Xnew,Ynew,nbState,mty(S1-1));
     double newLogLX1 = R::dnorm(Xj,Xnew+newMove1(0),newMove1(2),1);
     double newLogLY1 = R::dnorm(Yj,Ynew+newMove1(1),newMove1(3),1);
     
