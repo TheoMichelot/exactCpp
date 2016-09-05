@@ -2,7 +2,8 @@
 #' Setup data and parameters for MCMC algorithm
 #' 
 #' @param obs Matrix or data frame of observations, with columns x, y, and time.
-#' @param par0 List of initial values for the movement parameters. Must have three elements: m, b, and v,
+#' @param par0 List of initial values for the movement parameters. Must have three elements: m (of length
+#' twice the number of state), b, and v (both of length the number of states).
 #' each of length the number of states.
 #' @param rates0 Vector of initial values for the switching rates. Must be of length 
 #' number of states * (number of states - 1).
@@ -26,7 +27,7 @@
 #' \item{lenmax}{Maximum length of updated interval;}
 #' \item{thin}{Thinning factor;}
 #' \item{prUpdateMove}{Probability of updating movement parameters at each iteration.}
-setupMCMC <- function(obs, par0, rates0, mty=c(2,2,2), homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
+setupMCMC <- function(obs, par0, rates0, mty, homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
                       priorMean=NULL, priorSD=NULL, proposalSD=NULL, priorShape=c(4,4), nbIter=5e5, 
                       map=NULL, nbState=NULL, 
                       controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15))
@@ -41,8 +42,16 @@ setupMCMC <- function(obs, par0, rates0, mty=c(2,2,2), homog=list(mHomog=FALSE,b
     } else
         adapt <- TRUE
     
-    if(any(par0$b<0))
+    if(any(par0$b[!is.na(par0$b)]<0))
         stop("Initial values for b should be positive (we really estimate -b).")
+    
+    check1 <- (homog$mHomog | homog$bHomog | homog$vHomog)
+    check2 <- any(mty!=mty[1])
+    if(check1 & check2) {
+        warning(paste("Movement parameters must be state-dependent if different process types are",
+                      "used in the different states."))
+        homog <- list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE)
+    }
     
     ###############
     ## Read data ##
@@ -178,6 +187,7 @@ setupMCMC <- function(obs, par0, rates0, mty=c(2,2,2), homog=list(mHomog=FALSE,b
                 adapt=adapt,
                 par0=par,
                 rates0=rates0,
+                mty=mty,
                 priorMean=priorMean,
                 priorSD=priorSD,
                 priorShape=priorShape,

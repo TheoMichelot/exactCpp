@@ -31,6 +31,7 @@ MCMCloop <- function(allArgs)
     adapt <- allArgs$adapt
     par0 <- allArgs$par0
     rates0 <- allArgs$rates0
+    mty <- allArgs$mty
     priorMean <- allArgs$priorMean
     priorSD <- allArgs$priorSD
     priorShape <- allArgs$priorShape
@@ -80,7 +81,7 @@ MCMCloop <- function(allArgs)
         ####################################
         ## Simulate movement and switches ##
         ####################################
-        sim <- simMove_rcpp(subObs,par,controls$kappa,rates,nbState,map,adapt)
+        sim <- simMove_rcpp(subObs,par,controls$kappa,rates,nbState,map,adapt,mty)
         subData <- sim[[1]]
         indObs <- sim[[2]]
         indObs <- indObs[order(indObs)]
@@ -90,7 +91,7 @@ MCMCloop <- function(allArgs)
         
         if(!bk) {
             # compute the likelihood of the trajectory
-            HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState)
+            HR <- moveLike_rcpp(subData,indObs-1,indSwitch-1,par,aSwitches,nbState,mty)
             
             if(runif(1)<HR) {
                 
@@ -157,9 +158,10 @@ MCMCloop <- function(allArgs)
         # parameter update
         if(runif(1)<controls$prUpdateMove)
             par <- updatePar_rcpp(allData,par,priorMean,priorSD,proposalSD,nbState,
-                                  homog$mHomog,homog$bHomog,homog$vHomog,obs)
+                                  homog$mHomog,homog$bHomog,homog$vHomog,obs,mty)
         
-        if(!all(par==parCopy))
+        notNA <- which(!is.na(par))
+        if(!all(par[notNA]==parCopy[notNA]))
             accPar <- accPar + 1
         
         # print parameters to file
@@ -191,7 +193,7 @@ MCMCloop <- function(allArgs)
         
         if((jorder-1)%in%indSwitchAll) # should be moveable, else can't do anything locally
             aSwitches <- localUpdate_rcpp(allData,aSwitches,jorder-1,par,rates,controls$kappa,nbState,
-                                          controls$SDP,map,adapt)
+                                          controls$SDP,map,adapt,mty)
         
         if(iter%%controls$thin==0) {
             cat("End iteration ",iter,"/",nbIter," -- ",Sys.time()-t,"\n",sep="")
