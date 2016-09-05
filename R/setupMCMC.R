@@ -9,6 +9,7 @@
 #' number of states * (number of states - 1).
 #' @param mty Vector indicating the type of model used in each state (1 for Brownian motion,
 #' 2 for location OU).
+#' @param states0 Vector of initial states.
 #' @param homog List of mHomog, bHomog, and vHomog, which each indicate whether the corresponding movement
 #' parameter is homogeneous across states (TRUE) or not (FALSE -- default).
 #' @param priorMean List of means of priors for the movement parameters. Must have three elements: m, b, and v,
@@ -27,7 +28,7 @@
 #' \item{lenmax}{Maximum length of updated interval;}
 #' \item{thin}{Thinning factor;}
 #' \item{prUpdateMove}{Probability of updating movement parameters at each iteration.}
-setupMCMC <- function(obs, par0, rates0, mty, homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
+setupMCMC <- function(obs, par0, rates0, mty, states0=NULL, homog=list(mHomog=FALSE,bHomog=FALSE,vHomog=FALSE), 
                       priorMean=NULL, priorSD=NULL, proposalSD=NULL, priorShape=c(4,4), nbIter=5e5, 
                       map=NULL, nbState=NULL, 
                       controls=list(kappa=2,lenmin=3,lenmax=6,thin=100,prUpdateMove=1,SDP=0.15))
@@ -71,12 +72,19 @@ setupMCMC <- function(obs, par0, rates0, mty, homog=list(mHomog=FALSE,bHomog=FAL
     # initialize habitats and states
     if(adapt) {
         obs[,colHabitat] <- findRegion(obs[,colX],obs[,colY],map)
-        obs[,colState] <- obs[,colHabitat]
+        
+        if(is.null(states0))
+            obs[,colState] <- obs[,colHabitat]
+        else
+            obs[,colState] <- states0
     } else {
         obs[,colHabitat] <- 0
-        obs[,colState] <- sample(1:nbState, size=nrow(obs), replace=TRUE)
+        if(is.null(states0))
+            obs[,colState] <- sample(1:nbState, size=nrow(obs), replace=TRUE)
+        else
+            obs[,colState] <- states0
     }
-
+    
     obs[,colJump] <- 0 # jump for data point is always 0
     obs[,colBehav] <- 0 # behavioural states not known
     
