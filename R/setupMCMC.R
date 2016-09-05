@@ -97,8 +97,8 @@ setupMCMC <- function(obs, par0, rates0, mty, homog=list(mHomog=FALSE,bHomog=FAL
     
     if(is.null(priorSD)) {
         mPriorSD <- rep(c(10,10),nbState)
-        bPriorSD <- rep(10,nbState)
-        vPriorSD <- rep(10,nbState)
+        bPriorSD <- rep(5,nbState)
+        vPriorSD <- rep(5,nbState)
         priorSD <- c(mPriorSD,bPriorSD,vPriorSD) 
     } else
         priorSD <- c(priorSD$m,priorSD$b,priorSD$v) 
