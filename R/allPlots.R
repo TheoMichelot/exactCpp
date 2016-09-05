@@ -1,5 +1,5 @@
 
-allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueState=NULL)
+allPlots <- function(nbState, fileparams, filerates, states, mty, truePar=NULL, trueState=NULL)
 {
     library(scales)
     pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
@@ -9,28 +9,42 @@ allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueS
     start <- floor(nrow(estim)/2)
     end <- nrow(estim)
     
+    # which states are BM and which are OU?
+    whichBM <- which(mty==1)
+    whichOU <- which(mty==2)
+    
+    mux <- estim[(start:end),2*(1:nbState)-1]
+    muy <- estim[(start:end),2*(1:nbState)]
+    b <- estim[(start:end),(2*nbState+1):(3*nbState)]
+    v <- estim[(start:end),(3*nbState+1):(4*nbState)]
+    
     # plot bounds for mu
-    muxmax <- max(estim[(start:end),(2*(1:nbState)-1)])
-    muxmin <- min(estim[(start:end),(2*(1:nbState)-1)])
-    muymax <- max(estim[(start:end),(2*(1:nbState))])
-    muymin <- min(estim[(start:end),(2*(1:nbState))])
+    muxmax <- max(mux[,whichOU])
+    muxmin <- min(mux[,whichOU])
+    muymax <- max(muy[,whichOU])
+    muymin <- min(muy[,whichOU])
     
     # plot bounds for b vs v
-    bmax <- max(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
-    bmin <- min(log(estim[(start:end),(2*nbState+1):(3*nbState)]))
-    vmax <- max(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
-    vmin <- min(log(estim[(start:end),(3*nbState+1):(4*nbState)]))
+    bmax <- max(log(b[,whichOU]))
+    bmin <- min(log(b[,whichOU]))
+    vmax <- max(log(v[,whichOU]))
+    vmin <- min(log(v[,whichOU]))
     
     # make sure true values are within plot bounds, if provided
     if(!is.null(truePar)) {
-        muxmax <- max(muxmax, truePar[2*(1:nbState)-1])
-        muxmin <- min(muxmin, truePar[2*(1:nbState)-1])
-        muymax <- max(muymax, truePar[2*(1:nbState)])
-        muymin <- min(muymin, truePar[2*(1:nbState)])
-        bmax <- max(bmax, log(-truePar[(2*nbState+1):(3*nbState)]))
-        bmin <- min(bmin, log(-truePar[(2*nbState+1):(3*nbState)]))
-        vmax <- max(vmax, log(truePar[(3*nbState+1):(4*nbState)]))
-        vmin <- min(vmin, log(truePar[(3*nbState+1):(4*nbState)]))
+        truemux <- truePar[2*(1:nbState)-1]
+        truemuy <- truePar[2*(1:nbState)]
+        trueb <- truePar[(2*nbState+1):(3*nbState)]
+        truev <- truePar[(3*nbState+1):(4*nbState)]
+        
+        muxmax <- max(muxmax, truemux[whichOU])
+        muxmin <- min(muxmin, truemux[whichOU])
+        muymax <- max(muymax, truemuy[whichOU])
+        muymin <- min(muymin, truemuy[whichOU])
+        bmax <- max(bmax, log(-trueb[whichOU]))
+        bmin <- min(bmin, log(-trueb[whichOU]))
+        vmax <- max(vmax, log(truev[whichOU]))
+        vmin <- min(vmin, log(truev[whichOU]))
     }
 
     # to ensure x and y scales are identical
@@ -42,35 +56,59 @@ allPlots <- function(nbState, fileparams, filerates, states, truePar=NULL, trueS
     lbv <- max(bmax-bmin,vmax-vmin)/2
     
     # plot mu
-    plot(estim[start:end,1],estim[start:end,2],pch=19,cex=0.2,col=alpha(pal[1],0.5),
+    plot(mux[,whichOU[1]],muy[,whichOU[1]],pch=19,cex=0.2,col=alpha(pal[1],0.5),
          xlab="mu_x",ylab="mu_y",xlim=c(muxmid-lxy,muxmid+lxy),ylim=c(muymid-lxy,muymid+lxy))
     
     if(!is.null(truePar))
-        points(truePar[1],truePar[2],pch=19)
+        points(truemux[whichOU[1]],truemuy[whichOU[1]],pch=19)
     
-    if(nbState>1) {
-        for(i in 2:nbState) {
-            points(estim[start:end,2*i-1],estim[start:end,2*i],pch=19,cex=0.2,col=alpha(pal[i],0.5))
+    if(length(whichOU)>1) {
+        for(i in whichOU[-1]) {
+            points(mux[,i],muy[,i],pch=19,cex=0.2,col=alpha(pal[i],0.5))
             
             if(!is.null(truePar))
-                points(truePar[2*i-1],truePar[2*i],pch=19)
+                points(truemux[i],truemuy[i],pch=19)
         }
     }
     
     # plot log(b) vs log(v)
-    plot(log(estim[start:end,2*nbState+1]),log(estim[start:end,3*nbState+1]),pch=19,cex=0.2,
-         col=alpha(pal[1],0.5),xlim=c(bmid-lbv,bmid+lbv),ylim=c(vmid-lbv,vmid+lbv),xlab="log(b)",ylab="log(v)")
+    plot(log(b[,whichOU[1]]),log(v[,whichOU[1]]),pch=19,cex=0.2,
+         col=alpha(pal[1],0.5),xlim=c(bmid-lbv,bmid+lbv),ylim=c(vmid-lbv,vmid+lbv),
+         xlab="log(b)",ylab="log(v)")
     
     if(!is.null(truePar))
-        points(log(-truePar[2*nbState+1]),log(truePar[3*nbState+1]),pch=19)
+        points(log(-trueb[whichOU[1]]),log(truev[whichOU[1]]),pch=19)
     
-    if(nbState>1) {
-        for(i in 2:nbState) {
-            points(log(estim[start:end,2*nbState+i]),log(estim[start:end,3*nbState+i]),pch=19,cex=0.2,
+    if(length(whichOU)>1) {
+        for(i in whichOU[-1]) {
+            points(log(b[,i]),log(v[,i]),pch=19,cex=0.2,
                    col=alpha(pal[i],0.5))
             
             if(!is.null(truePar))
-                points(log(-truePar[2*nbState+i]),log(truePar[3*nbState+i]),pch=19)
+                points(log(-trueb[i]),log(truev[i]),pch=19)
+        }
+    }
+    
+    # trace plots of BM variance
+    if(length(whichBM)>0) {
+        vmax <- max(log(v[,whichBM]))
+        vmin <- min(log(v[,whichBM]))
+        if(!is.null(truePar)) {
+            vmax <- max(vmax, log(truev[whichBM]))
+            vmin <- min(vmin, log(truev[whichBM]))
+        }
+        
+        plot(log(v[,whichBM[1]]),type="l",ylab="v",main=paste("State",whichBM[1]),
+             ylim=c(vmin,vmax))
+        
+        if(!is.null(truePar))
+            abline(h=log(truev[whichBM[1]]),col=2)
+        
+        for(i in whichBM[-1]) {
+            plot(log(v[,i]),type="l",ylab="v",main=paste("State",i))
+            
+            if(!is.null(truePar))
+                abline(h=log(truev[i]),col=2)
         }
     }
     
