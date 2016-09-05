@@ -1,7 +1,9 @@
 
 #' Simulate data from a switching OU process
 #' 
-#' @param par List of movement parameters. Must contain one vector for each state.
+#' @param mu Matrix of coordinates of centres of attraction (one row for each state)
+#' @param b Vector of b parameters.
+#' @param v Vector of v parameters.
 #' @param rates Vector of switching rates, 
 #' e.g (lambda_12, lambda_13, lambda_21, lambda_23, lambda_31, lambda_32).
 #' @param mty Vector indicating the type of model used in each state (1 for Brownian motion,
@@ -11,9 +13,9 @@
 #' @param duration Duration between first and last observations.
 #' @param write If TRUE, the simulated data are written into the file obs.csv (default: FALSE).
 #' @param showPlot If TRUE, the simulated data are plotted (default).
-#' @param points If TRUE, the simulated data are plotted as dots (default), otherwise only segments are
-#' plotted.
-simDataOU <- function(par, rates, mty=rep(2,length(par)), map=NULL, interval=1, duration=500, 
+#' @param points If TRUE, the simulated data are plotted as dots (default), 
+#' otherwise only segments are plotted.
+simDataOU <- function(mu, b, v, rates, mty=rep(2,length(par)), map=NULL, interval=1, duration=500, 
                       write=FALSE, showPlot=TRUE, points=TRUE)
 {
     nbState <- length(b)
@@ -78,11 +80,11 @@ simDataOU <- function(par, rates, mty=rep(2,length(par)), map=NULL, interval=1, 
         if(mty[state]==1) { # Brownian motion
             meanx <- data$x[t-1]
             meany <- data$y[t-1]
-            sd <- par[[state]][1]
+            sd <- v[state]
         } else { # Ornstein-Uhlenbeck
-            meanx <- par[[state]][1] + exp(par[[state]][3]*dt)*(data$x[t-1]-par[[state]][1])
-            meany <- par[[state]][2] + exp(par[[state]][3]*dt)*(data$y[t-1]-par[[state]][2])
-            sd <- sqrt(par[[state]][4]*(1-exp(2*par[[state]][3]*dt)))
+            meanx <- mu[state,1] + exp(b[state]*dt)*(data$x[t-1]-mu[state,1])
+            meany <- mu[state,2] + exp(b[state]*dt)*(data$y[t-1]-mu[state,2])
+            sd <- sqrt(v[state]*(1-exp(2*b[state]*dt)))
         }
         
         data$x[t] <- rnorm(1,meanx,sd)
