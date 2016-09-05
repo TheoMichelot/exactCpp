@@ -60,7 +60,7 @@ MCMCloop <- function(allArgs)
     bk <- FALSE
 
     # for state probabilities
-    states <- matrix(0,nrow=nbObs,ncol=nbState)
+    stateProbs <- matrix(0,nrow=nbObs,ncol=nbState)
     
     # MCMC loop
     for(iter in 1:nbIter) {
@@ -107,8 +107,8 @@ MCMCloop <- function(allArgs)
                 obs[point1:point2,colState] <- subData[indObs,colState]
                 
                 # update state probabilities
-                states[point1:point2,obs[point1:point2,colState]] <- 
-                    states[point1:point2,obs[point1:point2,colState]]+1
+                stateProbs[point1:point2,obs[point1:point2,colState]] <- 
+                    stateProbs[point1:point2,obs[point1:point2,colState]]+1
                 
                 # data's jump do not need updating it is always 0
                 
@@ -208,5 +208,5 @@ MCMCloop <- function(allArgs)
                 filerates=filerates,
                 accTrajAll=accTrajAll,
                 accParAll=accParAll,
-                states=states))
+                stateProbs=stateProbs))
 }

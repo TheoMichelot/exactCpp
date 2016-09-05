@@ -1,5 +1,5 @@
 
-allPlots <- function(nbState, fileparams, filerates, states, mty, truePar=NULL, trueState=NULL)
+allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NULL, trueState=NULL)
 {
     library(scales)
     pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
@@ -122,7 +122,7 @@ allPlots <- function(nbState, fileparams, filerates, states, mty, truePar=NULL, 
     }
     
     # plot most probable states
-    maxState <- apply(states,1,which.max)
+    maxState <- apply(stateProbs,1,which.max)
     if(is.null(trueState))
         plot(maxState,type="o",pch=19,cex=0.5,ylab="state",main="Decoded states")
     else {
