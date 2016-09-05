@@ -10,7 +10,7 @@ using namespace Rcpp;
 
 // [[Rcpp::export]]
 List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma::vec proposalSD,
-                     int nbState, bool mHomog, bool bHomog, bool vHomog)
+                     int nbState, bool mHomog, bool bHomog, bool vHomog, arma::vec mty)
 {
     arma::vec wpar = n2w(par,nbState);
     // unpack the vector of parameters
@@ -40,7 +40,7 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
         double xmove = R::rnorm(0,mProposalSD(0)); // change in x
         double ymove = R::rnorm(0,mProposalSD(1)); // change in y
         for(int i=0 ; i<m.size()/2 ; i++) {
-            // include same change to all states
+            // apply same change to all states
             mprime(2*i) = mprime(2*i) + xmove;
             mprime(2*i+1) = mprime(2*i+1) + ymove;
         }
@@ -54,10 +54,12 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
             nbState*R::dnorm(mprime(1),mPriorMean(1),mPriorSD(1),1);
     } else {
         for(int i=0 ; i<m.size() ; i++) {
-            mprime(i) = mprime(i) + R::rnorm(0,mProposalSD(i)); // different change for each state
-            
-            oldLogPrior = oldLogPrior + R::dnorm(m(i),mPriorMean(i),mPriorSD(i),1);
-            newLogPrior = newLogPrior + R::dnorm(mprime(i),mPriorMean(i),mPriorSD(i),1);
+            if(mty(floor(i/2))==2) { // only if OU
+                mprime(i) = mprime(i) + R::rnorm(0,mProposalSD(i)); // different change for each state
+                
+                oldLogPrior = oldLogPrior + R::dnorm(m(i),mPriorMean(i),mPriorSD(i),1);
+                newLogPrior = newLogPrior + R::dnorm(mprime(i),mPriorMean(i),mPriorSD(i),1);                
+            }
         }
     }
     
@@ -70,10 +72,12 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
         newLogPrior = newLogPrior + nbState*R::dnorm(bprime(0),bPriorMean(0),bPriorSD(0),1);
     } else {
         for(int i=0 ; i<b.size() ; i++) {
-            bprime(i) = bprime(i) + R::rnorm(0,bProposalSD(i));
-            
-            oldLogPrior = oldLogPrior + R::dnorm(b(i),bPriorMean(i),bPriorSD(i),1);
-            newLogPrior = newLogPrior + R::dnorm(bprime(i),bPriorMean(i),bPriorSD(i),1);
+            if(mty(i)==2) { // only if OU
+                bprime(i) = bprime(i) + R::rnorm(0,bProposalSD(i));
+                
+                oldLogPrior = oldLogPrior + R::dnorm(b(i),bPriorMean(i),bPriorSD(i),1);
+                newLogPrior = newLogPrior + R::dnorm(bprime(i),bPriorMean(i),bPriorSD(i),1);
+            }
         }
     }
     
