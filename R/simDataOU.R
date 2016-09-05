@@ -15,7 +15,7 @@
 #' @param showPlot If TRUE, the simulated data are plotted (default).
 #' @param points If TRUE, the simulated data are plotted as dots (default), 
 #' otherwise only segments are plotted.
-simDataOU <- function(mu, b, v, rates, mty=rep(2,length(par)), map=NULL, interval=1, duration=500, 
+simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500, 
                       write=FALSE, showPlot=TRUE, points=TRUE)
 {
     nbState <- length(b)
