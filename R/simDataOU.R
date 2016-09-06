@@ -34,6 +34,9 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
     
     kappa <- max(rowSums(lambda))
     
+    ####################################
+    ## Add potential switches to data ##
+    ####################################
     # number of observations to simulate
     nbObs <- duration/interval
     
@@ -50,6 +53,9 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
     times <- times[order(times)]
     nbData <- length(times)
     
+    #####################
+    ## Initialize data ##
+    #####################
     data <- data.frame(x=rep(NA,nbData),
                        y=rep(NA,nbData),
                        state=rep(NA,nbData),
@@ -66,7 +72,9 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
     # is the data point an observation? (or a potential switch)
     isObs <- (times %in% obsTimes)
     
-    # loop over simulated observations
+    ############################
+    ## Loop over observations ##
+    ############################
     for(t in 2:nbData) {
         if(t%%500==0) 
             cat(t/nbData*100,"%\n",sep="")
@@ -114,6 +122,9 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
     # only keep obervations (remove switches)
     obs <- data[isObs,]
     
+    #################################
+    ## Plot simulated observations ##
+    #################################
     if(showPlot) {
         par(mfrow=c(1,1))
         pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
@@ -146,6 +157,7 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
         }
     }
     
+    # write observations to file
     if(write)
         write.csv(obs[,c(1,2,4)],file="obs.csv",row.names=FALSE)        
     
