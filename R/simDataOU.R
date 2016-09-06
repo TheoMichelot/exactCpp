@@ -94,7 +94,7 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
         if(mty[state]==1) { # Brownian motion
             meanx <- data$x[t-1]
             meany <- data$y[t-1]
-            sd <- v[state]
+            sd <- sqrt(v[state])
         } else { # Ornstein-Uhlenbeck
             meanx <- mu[state,1] + exp(b[state]*dt)*(data$x[t-1]-mu[state,1])
             meany <- mu[state,2] + exp(b[state]*dt)*(data$y[t-1]-mu[state,2])

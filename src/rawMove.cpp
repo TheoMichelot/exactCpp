@@ -29,8 +29,8 @@ arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, i
         
         res(0) = 0;
         res(1) = 0;
-        res(2) = v;
-        res(3) = v;
+        res(2) = sqrt(v);
+        res(3) = sqrt(v);
     } else { // Ornstein-Uhlenbeck
         double mux = mpar(2*state-2);
         double muy = mpar(2*state-1);
@@ -39,8 +39,8 @@ arma::vec rawMove(arma::vec par, int state, double deltaT, double x, double y, i
         double phi = exp(b*deltaT);
         double sd = sqrt(v*(1-phi*phi));
         
-        res(0) = (1-phi)*(mux-x); // x mean (new mean - old location)
-        res(1) = (1-phi)*(muy-y); // y mean (new mean - old location)
+        res(0) = (1-phi)*(mux-x); // x mean displacement (new mean - old location)
+        res(1) = (1-phi)*(muy-y); // y mean displacement (new mean - old location)
         res(2) = sd; // x sd
         res(3) = sd; // y sd        
     }
