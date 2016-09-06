@@ -66,8 +66,14 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
     data$state[1] <- sample(1:nbState,size=1)
     if(adapt)
         data$habitat[1] <- data$state[1]
-    data$x[1] <- mu[data$state[1],1]
-    data$y[1] <- mu[data$state[1],2]
+
+    if(mty[data$state[1]]==2) {
+        data$x[1] <- mu[data$state[1],1]
+        data$y[1] <- mu[data$state[1],2]
+    } else {
+        data$x[1] <- 0
+        data$y[1] <- 0
+    }
     
     # is the data point an observation? (or a potential switch)
     isObs <- (times %in% obsTimes)
