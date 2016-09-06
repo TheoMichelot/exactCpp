@@ -56,7 +56,7 @@ allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NU
     lbv <- max(bmax-bmin,vmax-vmin)/2
     
     # plot mu
-    plot(mux[,whichOU[1]],muy[,whichOU[1]],pch=19,cex=0.2,col=alpha(pal[1],0.5),
+    plot(mux[,whichOU[1]],muy[,whichOU[1]],pch=19,cex=0.2,col=alpha(pal[whichOU[1]],0.5),
          xlab="mu_x",ylab="mu_y",xlim=c(muxmid-lxy,muxmid+lxy),ylim=c(muymid-lxy,muymid+lxy))
     
     if(!is.null(truePar))
@@ -72,9 +72,8 @@ allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NU
     }
     
     # plot log(b) vs log(v)
-    plot(log(b[,whichOU[1]]),log(v[,whichOU[1]]),pch=19,cex=0.2,
-         col=alpha(pal[1],0.5),xlim=c(bmid-lbv,bmid+lbv),ylim=c(vmid-lbv,vmid+lbv),
-         xlab="log(b)",ylab="log(v)")
+    plot(log(b[,whichOU[1]]),log(v[,whichOU[1]]),pch=19,cex=0.2,col=alpha(pal[whichOU[1]],0.5),
+         xlim=c(bmid-lbv,bmid+lbv),ylim=c(vmid-lbv,vmid+lbv),xlab="log(b)",ylab="log(v)")
     
     if(!is.null(truePar))
         points(log(-trueb[whichOU[1]]),log(truev[whichOU[1]]),pch=19)
@@ -98,7 +97,7 @@ allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NU
             vmin <- min(vmin, log(truev[whichBM]))
         }
         
-        plot(log(v[,whichBM[1]]),type="l",ylab="v",main=paste("State",whichBM[1]),
+        plot(log(v[,whichBM[1]]),type="l",ylab="log(v)",main=paste("State",whichBM[1]),
              ylim=c(vmin,vmax))
         
         if(!is.null(truePar))
