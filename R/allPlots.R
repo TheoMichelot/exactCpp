@@ -1,5 +1,6 @@
 
-allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NULL, trueState=NULL)
+allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NULL, trueState=NULL,
+                     obs=NULL, plotTrack=FALSE)
 {
     library(scales)
     pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
@@ -46,7 +47,7 @@ allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NU
         vmax <- max(vmax, log(truev[whichOU]))
         vmin <- min(vmin, log(truev[whichOU]))
     }
-
+    
     # to ensure x and y scales are identical
     muxmid <- (muxmin+muxmax)/2
     muymid <- (muymin+muymax)/2
@@ -129,4 +130,26 @@ allPlots <- function(nbState, fileparams, filerates, stateProbs, mty, truePar=NU
         plot(maxState,type="o",pch=19,cex=0.5,ylab="state",main="Decoded states")
         plot(trueState,type="o",pch=19,cex=0.5,ylab="state",main="True states")
     }
+    
+    # plot track with decoded states
+    if(plotTrack) {
+        par(mfrow=c(1,1))
+        pal <- c("#E69F00", "#56B4E9", "#009E73", "#F0E442")
+        
+        states <- apply(stateProbs,1,which.max)
+        
+        xmin <- min(obs[,1])
+        xmax <- max(obs[,1])
+        xmid <- (xmin+xmax)/2
+        ymin <- min(obs[,2])
+        ymax <- max(obs[,2])
+        ymid <- (ymin+ymax)/2
+        l <- max(xmax-xmin,ymax-ymin)/2
+        
+        plot(obs[1,1],obs[1,2],pch=21,bg=pal[states[1]],cex=0.8,
+             xlim=c(xmid-l,xmid+l),ylim=c(ymid-l,ymid+l),xlab="x",ylab="y")
+        
+        points(obs[,1],obs[,2],pch=21,bg=pal[states],cex=0.8,type="o")
+    }
+    
 }
