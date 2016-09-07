@@ -57,6 +57,13 @@ MCMCloop <- function(allArgs)
     par <- allArgs$par0
     rates <- allArgs$rates0
  
+    # initialize kappa
+    G <- diag(nbState)
+    G[!G] <- rates
+    G <- t(G)
+    diag(G) <- 0
+    controls$kappa <- max(rowSums(G))
+    
     bk <- FALSE
 
     # for state probabilities
@@ -181,6 +188,16 @@ MCMCloop <- function(allArgs)
         # print switching rates to file
         if(iter%%controls$thin==0)
             cat(file=filerates,rates,"\n", append = TRUE)
+        
+        # update kappa if necessary
+        G <- diag(nbState)
+        G[!G] <- rates
+        G <- t(G)
+        diag(G) <- 0
+        if(max(rowSums(G))>controls$kappa) {
+            cat("kappa updated to",max(rowSums(G)),"\n")
+            controls$kappa <- max(rowSums(G))            
+        }
         
         bk <- FALSE
         
