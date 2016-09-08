@@ -9,11 +9,12 @@
 using namespace Rcpp;
 
 // Multivariate normal generator
-arma::mat mvrnormArma(arma::vec mu, arma::mat sigma) 
+arma::rowvec mvrnormArma(arma::vec mu, arma::mat sigma) 
 {
     int ncols = sigma.n_cols;
-    arma::mat Y = arma::randn(1, ncols);
-    return arma::repmat(mu, 1, 1).t() + Y * arma::chol(sigma);
+    arma::rowvec Y(ncols); 
+    Y.randn(ncols);
+    return mu.t() + Y * arma::chol(sigma);
 }
 
 // [[Rcpp::export]]
@@ -71,59 +72,59 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
         }
     }
     
-    // if(bHomog) {
-    //     double bmove = R::rnorm(0,bProposalSD(0));
-    //     for(int i=0 ; i<b.size() ; i++)
-    //         bprime(i) = bprime(i) + bmove;
-    //     
-    //     oldLogPrior = oldLogPrior + nbState*R::dnorm(b(0),bPriorMean(0),bPriorSD(0),1);
-    //     newLogPrior = newLogPrior + nbState*R::dnorm(bprime(0),bPriorMean(0),bPriorSD(0),1);
-    // } else {
-    //     for(int i=0 ; i<b.size() ; i++) {
-    //         if(mty(i)==2) { // only if OU
-    //             bprime(i) = bprime(i) + R::rnorm(0,bProposalSD(i));
-    //             
-    //             oldLogPrior = oldLogPrior + R::dnorm(b(i),bPriorMean(i),bPriorSD(i),1);
-    //             newLogPrior = newLogPrior + R::dnorm(bprime(i),bPriorMean(i),bPriorSD(i),1);
-    //         }
-    //     }
-    // }
-    // 
-    // if(vHomog) {
-    //     double vmove = R::rnorm(0,vProposalSD(0));
-    //     for(int i=0 ; i<v.size() ; i++)
-    //         vprime(i) = vprime(i) + vmove;
-    //     
-    //     oldLogPrior = oldLogPrior + nbState*R::dnorm(v(0),vPriorMean(0),vPriorSD(0),1);
-    //     newLogPrior = newLogPrior + nbState*R::dnorm(vprime(0),vPriorMean(0),vPriorSD(0),1);
-    // } else {
-    //     for(int i=0 ; i<v.size() ; i++) {
-    //         vprime(i) = vprime(i) + R::rnorm(0,vProposalSD(i));
-    //         
-    //         oldLogPrior = oldLogPrior + R::dnorm(v(i),vPriorMean(i),vPriorSD(i),1);
-    //         newLogPrior = newLogPrior + R::dnorm(vprime(i),vPriorMean(i),vPriorSD(i),1);
-    //     }
-    // }
-    
+//     if(bHomog) {
+//         double bmove = R::rnorm(0,bProposalSD(0));
+//         for(int i=0 ; i<b.size() ; i++)
+//             bprime(i) = bprime(i) + bmove;
+//         
+//         oldLogPrior = oldLogPrior + nbState*R::dnorm(b(0),bPriorMean(0),bPriorSD(0),1);
+//         newLogPrior = newLogPrior + nbState*R::dnorm(bprime(0),bPriorMean(0),bPriorSD(0),1);
+//     } else {
+//         for(int i=0 ; i<b.size() ; i++) {
+//             if(mty(i)==2) { // only if OU
+//                 bprime(i) = bprime(i) + R::rnorm(0,bProposalSD(i));
+//                 
+//                 oldLogPrior = oldLogPrior + R::dnorm(b(i),bPriorMean(i),bPriorSD(i),1);
+//                 newLogPrior = newLogPrior + R::dnorm(bprime(i),bPriorMean(i),bPriorSD(i),1);
+//             }
+//         }
+//     }
+//     
+//     if(vHomog) {
+//         double vmove = R::rnorm(0,vProposalSD(0));
+//         for(int i=0 ; i<v.size() ; i++)
+//             vprime(i) = vprime(i) + vmove;
+//         
+//         oldLogPrior = oldLogPrior + nbState*R::dnorm(v(0),vPriorMean(0),vPriorSD(0),1);
+//         newLogPrior = newLogPrior + nbState*R::dnorm(vprime(0),vPriorMean(0),vPriorSD(0),1);
+//     } else {
+//         for(int i=0 ; i<v.size() ; i++) {
+//             vprime(i) = vprime(i) + R::rnorm(0,vProposalSD(i));
+//             
+//             oldLogPrior = oldLogPrior + R::dnorm(v(i),vPriorMean(i),vPriorSD(i),1);
+//             newLogPrior = newLogPrior + R::dnorm(vprime(i),vPriorMean(i),vPriorSD(i),1);
+//         }
+//     }
+
     arma::mat sigma(2,2);
-    sigma(0,0) = 1;
-    sigma(0,1) = -0.4;
-    sigma(1,0) = -0.4;
-    sigma(1,1) = 1;
+    sigma(0,0) = 0.06;
+    sigma(0,1) = -0.05;
+    sigma(1,0) = -0.05;
+    sigma(1,1) = 0.06;
     arma::vec mu(2);
     mu.zeros();
-    
+
     for(int i=0 ; i<b.size() ; i++) {
-        arma::mat update = mvrnormArma(mu, sigma);
+        arma::rowvec update = mvrnormArma(mu, sigma);
         bprime(i) = bprime(i) + update(0);
         vprime(i) = vprime(i) + update(1);
-        
+
         oldLogPrior = oldLogPrior + R::dnorm(b(i),bPriorMean(i),bPriorSD(i),1);
         newLogPrior = newLogPrior + R::dnorm(bprime(i),bPriorMean(i),bPriorSD(i),1);
         oldLogPrior = oldLogPrior + R::dnorm(v(i),vPriorMean(i),vPriorSD(i),1);
         newLogPrior = newLogPrior + R::dnorm(vprime(i),vPriorMean(i),vPriorSD(i),1);
     }
-    
+
     // newPar = w2n(c(mprime,bprime,vprime),nbState)
     arma::vec newPar(m.size()+b.size()+v.size());
     for(int i=0 ; i<2*nbState ; i++)
@@ -132,14 +133,14 @@ List updateMove_rcpp(arma::vec par, arma::vec priorMean, arma::vec priorSD, arma
         newPar(2*nbState+i) = bprime(i);
     for(int i=0 ; i<nbState ; i++)
         newPar(3*nbState+i) = vprime(i);
-    
+
     newPar = w2n(newPar,nbState);
-    
+
     // list to be returned
     List res(3);
     res[0] = newPar;
     res[1] = oldLogPrior;
     res[2] = newLogPrior;
-    
+
     return res;
 }
