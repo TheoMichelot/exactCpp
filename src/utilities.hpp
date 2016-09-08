@@ -84,7 +84,7 @@ arma::vec n2w(arma::vec par, int nbState)
 //' @param nbState Number of states.
 arma::vec w2n(arma::vec wpar, int nbState)
 {
-    arma::vec par(par.size());
+    arma::vec par(wpar.size());
     
     for(int i=0 ; i<2*nbState ; i++)
         par(i) = wpar(i); // m
