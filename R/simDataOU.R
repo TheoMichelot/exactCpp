@@ -22,7 +22,7 @@ simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500,
     
     adapt <- TRUE # adaptative case?
     if(is.null(map)) {
-        map <- matrix(1,1,1)
+        map <- matrix(1)
         adapt <- FALSE
     }
     
