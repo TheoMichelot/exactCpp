@@ -18,7 +18,7 @@
 #' m, b, and v, each of length the number of states.
 #' @param proposalSD List of standard deviations of proposals for the movement parameters. Must have three elements: 
 #' m, b, and v, each of length the number of states.
-#' @param shape Prior shapes for beta distribution of switching rates.
+#' @param priorShape Prior shapes for beta distribution of switching rates.
 #' @param nbIter Number of iterations of the MCMC algorithm.
 #' @param map Map of habitats, if adaptative model.
 #' @param nbState Number of states.
@@ -105,8 +105,8 @@ setupMCMC <- function(obs, par0, rates0, mty, states0=NULL, homog=list(mHomog=FA
     
     if(is.null(priorSD)) {
         mPriorSD <- rep(c(10,10),nbState)
-        bPriorSD <- rep(5,nbState)
-        vPriorSD <- rep(5,nbState)
+        bPriorSD <- rep(10,nbState)
+        vPriorSD <- rep(10,nbState)
         priorSD <- c(mPriorSD,bPriorSD,vPriorSD) 
     } else
         priorSD <- c(priorSD$m,priorSD$b,priorSD$v) 
@@ -156,7 +156,7 @@ setupMCMC <- function(obs, par0, rates0, mty, states0=NULL, homog=list(mHomog=FA
     cat(file=filerates, "\n", rates0, "\n", append = TRUE)
     
     ####################################
-    ## Prepare set of actual swtiches ##
+    ## Prepare set of actual switches ##
     ####################################
     # indices of state switches
     whichActual <- which(obs[-1,colState]!=obs[-nbObs,colState])+1

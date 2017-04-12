@@ -72,6 +72,10 @@ arma::vec updatePar_rcpp(arma::mat allData, arma::vec par, arma::vec priorMean, 
     // log Hastings ratio
     double logHR = newLogPrior - oldLogPrior + sum(newLogLX) + sum(newLogLY) - sum(oldLogLX) - sum(oldLogLY);
     
+//     Rcout << "newLogPrior = " << newLogPrior << ", oldLogPrior = " << oldLogPrior << ", sum(newLogLX) = " <<
+//         sum(newLogLX) << ", sum(newLogLY) = " << sum(newLogLY) << ", sum(oldLogLX) = " << sum(oldLogLX) <<
+//             ", sum(oldLogLY) = " << sum(oldLogLY) << std::endl;
+    
     if(R::runif(0,1)<exp(logHR)) {
         // accept movement parameters
         return newPar;

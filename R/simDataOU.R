@@ -18,6 +18,12 @@
 simDataOU <- function(mu, b, v, rates, mty, map=NULL, interval=1, duration=500, 
                       write=FALSE, showPlot=TRUE, points=TRUE)
 {
+    #####################
+    ## Check arguments ##
+    #####################
+    if(any(b[!is.na(b)]>=0))
+        stop("b needs to be negative.")
+    
     nbState <- length(b)
     
     adapt <- TRUE # adaptative case?
